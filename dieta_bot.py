@@ -38,6 +38,71 @@ EMOJI_PASTI = {
 }
 
 # ============================================================
+# CATEGORIZZAZIONE INGREDIENTI
+# ============================================================
+
+def estrai_e_categorizza_ingredienti():
+    """Estrae tutti gli ingredienti dal menu e li categorizza"""
+    ingredienti = {}
+    
+    # Parole chiave per categorie
+    verdure_keywords = ['spinaci', 'carote', 'zucchine', 'insalata', 'pomodori', 'asparagi', 'broccoli', 
+                        'cavolo', 'melanzane', 'peperoni', 'cipolla', 'aglio', 'lattuga', 'rucola', 'bietola']
+    proteine_keywords = ['pollo', 'pesce', 'carne', 'uova', 'tofu', 'salmone', 'merluzzo', 'trota', 'sgombro',
+                         'vitello', 'manzo', 'maiale', 'prosciutto', 'petto di pollo', 'fesa di tacchino']
+    carboidrati_keywords = ['riso', 'pasta', 'pane', 'patate', 'farro', 'orzo', 'ceci', 'lenticchie', 'fagioli',
+                            'grano', 'avena', 'mais', 'polenta', 'couscous']
+    latticini_keywords = ['ricotta', 'yogurt', 'formaggio', 'mozzarella', 'grana', 'parmigiano', 'latte', 'burro',
+                          'mascarpone', 'pecorino', 'provolone', 'scamorza']
+    
+    categorie = {
+        '🥬 VERDURE': verdure_keywords,
+        '🍗 PROTEINE': proteine_keywords,
+        '🥕 CARBOIDRATI': carboidrati_keywords,
+        '🧀 LATTICINI': latticini_keywords
+    }
+    
+    # Estrai ingredienti da tutte le settimane
+    tutti_ingredienti = set()
+    
+    for stagione_data in MENU.values():
+        for settimana_data in stagione_data.values():
+            for pasti_dict in settimana_data.values():
+                for descrizione in pasti_dict.values():
+                    if isinstance(descrizione, str):
+                        # Estrai parole (split per • e spazi)
+                        parole = descrizione.lower().replace('•', ' ').replace(',', ' ').split()
+                        tutti_ingredienti.update(parole)
+    
+    # Categorizza
+    ingredienti_categorizzati = {cat: [] for cat in categorie.keys()}
+    
+    for ingrediente in sorted(tutti_ingredienti):
+        if len(ingrediente) < 2:
+            continue
+        
+        # Pulisci l'ingrediente
+        ing_clean = ingrediente.strip()
+        
+        # Verifica in quale categoria va
+        trovato = False
+        for categoria, keywords in categorie.items():
+            if any(keyword in ing_clean for keyword in keywords):
+                if ing_clean not in ingredienti_categorizzati[categoria]:
+                    ingredienti_categorizzati[categoria].append(ing_clean)
+                trovato = True
+                break
+        
+        # Se non categorizzato, mettilo nei carboidrati (default)
+        if not trovato and len(ing_clean) > 2:
+            if ing_clean not in ingredienti_categorizzati['🥕 CARBOIDRATI']:
+                ingredienti_categorizzati['🥕 CARBOIDRATI'].append(ing_clean)
+    
+    return ingredienti_categorizzati
+
+INGREDIENTI_CATEGORIZZATI = estrai_e_categorizza_ingredienti()
+
+# ============================================================
 # COMANDI
 # ============================================================
 
@@ -53,6 +118,8 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
     keyboard = [
         [InlineKeyboardButton("☀️ ESTATE", callback_data="stagione_ESTATE")],
         [InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")],
+        [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
+        [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
@@ -180,6 +247,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         stagione = parts[2]
         settimana = parts[3]
         await mostra_giorni_settimana(query, stagione, f"SETTIMANA_{settimana}")
+    
+    # CREA SETTIMANA PERSONALIZZATA
+    elif data == "crea_settimana_start":
+        await mostra_categorie_crea_settimana(query, update.effective_user.id)
+    
+    # LE MIE SETTIMANE
+    elif data == "mie_settimane_start":
+        await mostra_mie_settimane(query, update.effective_user.id)
 
 async def mostra_menu_principale(query):
     """Mostra il menu principale"""
@@ -193,6 +268,8 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
     keyboard = [
         [InlineKeyboardButton("☀️ ESTATE", callback_data="stagione_ESTATE")],
         [InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")],
+        [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
+        [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
@@ -253,6 +330,43 @@ async def mostra_menu_giorno(query, stagione, settimana, giorno_idx):
                              callback_data=f"giorno_{stagione}_{settimana_num}_{giorno_idx + 1}" if giorno_idx < len(GIORNI) - 1 else "skip")],
         [InlineKeyboardButton("⬅️ Giorni", callback_data=f"back_giorni_{stagione}_{settimana_num}")],
         [InlineKeyboardButton("🏠 HOME", callback_data="home")],
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+# ============================================================
+# CREA SETTIMANA PERSONALIZZATA
+# ============================================================
+
+async def mostra_categorie_crea_settimana(query, user_id):
+    """Mostra le categorie per creare una settimana personalizzata"""
+    text = """
+✨ *CREA SETTIMANA PERSONALIZZATA*
+
+Scegli una categoria per selezionare gli ingredienti:
+"""
+    
+    keyboard = []
+    for categoria in INGREDIENTI_CATEGORIZZATI.keys():
+        keyboard.append([InlineKeyboardButton(categoria, callback_data=f"seleziona_cat_{categoria}")])
+    
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def mostra_mie_settimane(query, user_id):
+    """Mostra le settimane salvate dall'utente"""
+    text = """
+📁 *LE MIE SETTIMANE*
+
+Funzionalità in fase di sviluppo.
+Presto potrai visualizzare, salvare e eliminare le tue settimane personalizzate!
+"""
+    
+    keyboard = [
+        [InlineKeyboardButton("🏠 HOME", callback_data="home")]
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
