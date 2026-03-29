@@ -42,74 +42,18 @@ EMOJI_PASTI = {
 # ============================================================
 
 def estrai_e_categorizza_ingredienti():
-    """Estrae tutti gli ingredienti dal menu e li categorizza"""
-    ingredienti = {}
-    
-    # Parole chiave per categorie
-    verdure_keywords = ['spinaci', 'carote', 'zucchine', 'insalata', 'pomodori', 'asparagi', 'broccoli', 
-                        'cavolo', 'melanzane', 'peperoni', 'cipolla', 'aglio', 'lattuga', 'rucola', 'bietola']
-    proteine_keywords = ['pollo', 'pesce', 'carne', 'uova', 'tofu', 'salmone', 'merluzzo', 'trota', 'sgombro',
-                         'vitello', 'manzo', 'maiale', 'prosciutto', 'petto di pollo', 'fesa di tacchino']
-    carboidrati_keywords = ['riso', 'pasta', 'pane', 'patate', 'farro', 'orzo', 'ceci', 'lenticchie', 'fagioli',
-                            'grano', 'avena', 'mais', 'polenta', 'couscous']
-    latticini_keywords = ['ricotta', 'yogurt', 'formaggio', 'mozzarella', 'grana', 'parmigiano', 'latte', 'burro',
-                          'mascarpone', 'pecorino', 'provolone', 'scamorza']
-    
-    categorie = {
-        '🥬 VERDURE': verdure_keywords,
-        '🍗 PROTEINE': proteine_keywords,
-        '🥕 CARBOIDRATI': carboidrati_keywords,
-        '🧀 LATTICINI': latticini_keywords
-    }
-    
-    # Unità di misura da escludere
-    unita_misura = ['g', 'gr', 'ml', 'l', 'dl', 'cl', 'kg', 'mg', 'fetta', 'fette', 'etto', 'ettì', 'tazza', 'cucchiaio', 'cucchiaini']
-    
-    # Estrai ingredienti da tutte le settimane
-    tutti_ingredienti = set()
-    
-    for stagione_data in MENU.values():
-        for settimana_data in stagione_data.values():
-            for pasti_dict in settimana_data.values():
-                for descrizione in pasti_dict.values():
-                    if isinstance(descrizione, str):
-                        # Estrai parole (split per • e spazi)
-                        parole = descrizione.lower().replace('•', ' ').replace(',', ' ').split()
-                        tutti_ingredienti.update(parole)
-    
-    # Categorizza
-    ingredienti_categorizzati = {cat: [] for cat in categorie.keys()}
-    
-    for ingrediente in sorted(tutti_ingredienti):
-        if len(ingrediente) < 2:
-            continue
-        
-        # Pulisci l'ingrediente
-        ing_clean = ingrediente.strip()
-        
-        # Scarta se è un numero o unità di misura
-        if ing_clean.isdigit() or ing_clean in unita_misura:
-            continue
-        
-        # Scarta se contiene solo numeri con caratteri speciali
-        if any(c.isalpha() for c in ing_clean) == False:
-            continue
-        
-        # Verifica in quale categoria va
-        trovato = False
-        for categoria, keywords in categorie.items():
-            if any(keyword in ing_clean for keyword in keywords):
-                if ing_clean not in ingredienti_categorizzati[categoria]:
-                    ingredienti_categorizzati[categoria].append(ing_clean)
-                trovato = True
-                break
-        
-        # Se non categorizzato, mettilo nei carboidrati (default)
-        if not trovato and len(ing_clean) > 2:
-            if ing_clean not in ingredienti_categorizzati['🥕 CARBOIDRATI']:
-                ingredienti_categorizzati['🥕 CARBOIDRATI'].append(ing_clean)
-    
-    return ingredienti_categorizzati
+    """Carica gli ingredienti dal file pulito"""
+    try:
+        with open('ingredienti_definitivi.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        # Fallback: lista di base se il file non esiste
+        return {
+            '🥬 VERDURE': ['Carote', 'Spinaci', 'Broccoli', 'Zucchine', 'Pomodori'],
+            '🍗 PROTEINE': ['Pollo', 'Pesce', 'Uova', 'Carne', 'Tacchino'],
+            '🥕 CARBOIDRATI': ['Riso', 'Pasta', 'Pane', 'Patate', 'Farro'],
+            '🧀 LATTICINI': ['Yogurt', 'Ricotta', 'Formaggio', 'Mozzarella', 'Latte']
+        }
 
 INGREDIENTI_CATEGORIZZATI = estrai_e_categorizza_ingredienti()
 
