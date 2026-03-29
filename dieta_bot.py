@@ -276,6 +276,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Crea settimana
     elif data == "crea_settimana_finale":
         await genera_e_salva_settimana(query, update.effective_user.id, context)
+    
+    # Salva settimana con nome
+    elif data == "salva_settimana_nome":
+        context.user_data['in_salvataggio'] = True
+        await query.edit_message_text(
+            "💾 *Inserisci il nome per la settimana:*\n\n"
+            "(Scrivi il nome e invialo come messaggio)",
+            parse_mode="Markdown"
+        )
 
 async def mostra_menu_principale(query):
     """Mostra il menu principale"""
@@ -593,10 +602,10 @@ async def genera_e_salva_settimana(query, user_id, context):
     context.user_data['settimana_generata'] = settimana
     
     # Mostra la settimana generata
-    text = "🎉 *SETTIMANA GENERATA!*\n\n"
+    text = "🎉 SETTIMANA GENERATA!\n\n"
     for idx, giorno_data in settimana.items():
         giorno_num = idx + 1
-        text += f"*Giorno {giorno_num}: {giorno_data['giorno']}*\n"
+        text += f"Giorno {giorno_num}: {giorno_data['giorno']}\n"
         text += f"({giorno_data['stagione']} - {giorno_data['settimana']})\n\n"
     
     keyboard = [
@@ -605,7 +614,69 @@ async def genera_e_salva_settimana(query, user_id, context):
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+    await query.edit_message_text(text, reply_markup=reply_markup)
+
+async def salva_settimana_con_nome(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Salva la settimana generata con il nome fornito"""
+    if not context.user_data.get('in_salvataggio'):
+        return
+    
+    nome_settimana = update.message.text.strip()
+    
+    if not nome_settimana or len(nome_settimana) < 2:
+        await update.message.reply_text("❌ Il nome deve avere almeno 2 caratteri!")
+        return
+    
+    user_id = update.effective_user.id
+    settimana = context.user_data.get('settimana_generata', {})
+    
+    if not settimana:
+        await update.message.reply_text("❌ Nessuna settimana da salvare!")
+        return
+    
+    # Carica o crea il file settimane_salvate.json
+    try:
+        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
+            settimane_salvate = json.load(f)
+    except FileNotFoundError:
+        settimane_salvate = {}
+    
+    # Aggiungi l'utente se non esiste
+    if str(user_id) not in settimane_salvate:
+        settimane_salvate[str(user_id)] = {}
+    
+    # Salva la settimana con il nome
+    settimane_salvate[str(user_id)][nome_settimana] = {
+        'data_creazione': str(__import__('datetime').datetime.now()),
+        'settimana': settimana
+    }
+    
+    # Scrivi su file
+    with open('settimane_salvate.json', 'w', encoding='utf-8') as f:
+        json.dump(settimane_salvate, f, ensure_ascii=False, indent=2)
+    
+    # Pulisci il flag
+    context.user_data['in_salvataggio'] = False
+    context.user_data['settimana_generata'] = {}
+    
+    # Invia conferma
+    text = f"""
+✅ *SETTIMANA SALVATA!*
+
+Nome: {nome_settimana}
+Data: {__import__('datetime').datetime.now().strftime('%d/%m/%Y %H:%M')}
+
+La tua settimana è stata salvata con successo!
+Puoi visualizzarla in "LE MIE SETTIMANE"
+"""
+    
+    keyboard = [
+        [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
+        [InlineKeyboardButton("🏠 HOME", callback_data="home")]
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def mostra_mie_settimane(query, user_id):
     """Mostra le settimane salvate dall'utente"""
@@ -622,6 +693,11 @@ Presto potrai visualizzare, salvare e eliminare le tue settimane personalizzate!
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def salva_settimana_con_nome_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Wrapper per gestire il salvataggio della settimana"""
+    if context.user_data.get('in_salvataggio'):
+        await salva_settimana_con_nome(update, context)
 
 # ============================================================
 # MAIN
@@ -640,6 +716,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CallbackQueryHandler(button_callback))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, salva_settimana_con_nome_wrapper))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, cerca_ingrediente))
     
     print("🚀 Bot avviato! Premi Ctrl+C per fermare.")
