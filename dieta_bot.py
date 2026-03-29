@@ -739,24 +739,34 @@ async def visualizza_settimana_salvata(query, user_id, nome_settimana):
         with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
             settimane_salvate = json.load(f)
     except FileNotFoundError:
-        await query.edit_message_text("❌ Errore: file settimane non trovato!")
+        await query.edit_message_text("❌ File settimane non trovato!")
+        return
+    except Exception as e:
+        await query.edit_message_text(f"❌ Errore lettura file: {str(e)}")
         return
     
     dati_settimana = settimane_salvate.get(str(user_id), {}).get(nome_settimana)
     
     if not dati_settimana:
-        await query.edit_message_text("❌ Settimana non trovata!")
+        await query.edit_message_text(f"❌ Settimana '{nome_settimana}' non trovata!")
         return
     
     settimana = dati_settimana.get('settimana', {})
     data_creazione = dati_settimana.get('data_creazione', 'N/A')
     
+    if not settimana:
+        await query.edit_message_text("❌ Dati settimana non validi!")
+        return
+    
     text = f"📖 {nome_settimana}\n\nData creazione: {data_creazione}\n\n"
     
     for idx, giorno_data in settimana.items():
-        giorno_num = idx + 1
-        text += f"Giorno {giorno_num}: {giorno_data['giorno']}\n"
-        text += f"({giorno_data['stagione']} - {giorno_data['settimana']})\n\n"
+        try:
+            giorno_num = int(idx) + 1 if isinstance(idx, str) else idx + 1
+            text += f"Giorno {giorno_num}: {giorno_data['giorno']}\n"
+            text += f"({giorno_data['stagione']} - {giorno_data['settimana']})\n\n"
+        except Exception as e:
+            text += f"Giorno {idx}: Errore nel caricamento\n"
     
     keyboard = [
         [InlineKeyboardButton("🗑️ ELIMINA", callback_data=f"elimina_settimana_{nome_settimana}")],
