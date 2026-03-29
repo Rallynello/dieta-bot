@@ -221,13 +221,19 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         nome_settimana = data.replace("elimina_settimana_", "")
         await elimina_settimana_salvata(query, update.effective_user.id, nome_settimana)
     
+    # Visualizza una settimana salvata
+    elif data.startswith("visualizza_settimana_"):
+        nome_settimana = data.replace("visualizza_settimana_", "")
+        await visualizza_settimana_salvata(query, update.effective_user.id, nome_settimana)
+    
     # Visualizza giorno di una settimana salvata
     elif data.startswith("visualizza_giorno_salvato_"):
-        parts = data.replace("visualizza_giorno_salvato_", "").split("_")
-        # Il nome_settimana potrebbe avere underscore, quindi l'ultimo elemento è l'indice
-        giorno_idx = parts[-1]
-        nome_settimana = "_".join(parts[:-1])
-        await visualizza_giorno_settimana_salvata(query, update.effective_user.id, nome_settimana, giorno_idx)
+        # Formato: visualizza_giorno_salvato_{nome_settimana}#{indice_giorno}
+        parts = data.replace("visualizza_giorno_salvato_", "").split("#")
+        if len(parts) == 2:
+            nome_settimana = parts[0]
+            giorno_idx = parts[1]
+            await visualizza_giorno_settimana_salvata(query, update.effective_user.id, nome_settimana, giorno_idx)
     
     # Selezione categoria per creare settimana
     elif data.startswith("seleziona_cat_"):
@@ -545,11 +551,16 @@ def genera_settimana_personalizzata(ingredienti_richiesti):
 def genera_settimana_personalizzata(ingredienti_richiesti):
     """Genera una settimana cercando di matchare gli ingredienti richiesti"""
     settimana_generata = {}
-    ingredienti_usati = set()
+    ingredienti_usati = []
     giorni_usati = set()
     
-    # STEP 1: Trova giorni che matchano gli ingredienti
-    for ingrediente in ingredienti_richiesti:
+    # STEP 1: Ordina gli ingredienti e cerca di matchare il più possibile
+    ingredienti_da_matchare = ingredienti_richiesti.copy()
+    
+    for ingrediente in ingredienti_da_matchare:
+        if len(settimana_generata) >= 7:  # Max 7 giorni
+            break
+        
         giorni_disponibili = trova_giorni_con_ingrediente(ingrediente)
         
         # Filtra i giorni già usati
@@ -560,10 +571,19 @@ def genera_settimana_personalizzata(ingredienti_richiesti):
             giorno_scelto = random.choice(giorni_disponibili)
             key = (giorno_scelto['stagione'], giorno_scelto['settimana'], giorno_scelto['giorno'])
             
-            if len(settimana_generata) < 7:  # Max 7 giorni
+            # Verifica se il giorno è già nella settimana (per aggiungere ingredienti nello stesso giorno se possibile)
+            giorno_aggiunto = False
+            for idx, giorno in settimana_generata.items():
+                if (giorno['stagione'], giorno['settimana'], giorno['giorno']) == key:
+                    # Giorno già nella settimana, marca come usato
+                    giorno_aggiunto = True
+                    ingredienti_usati.append(ingrediente)
+                    break
+            
+            if not giorno_aggiunto:
                 settimana_generata[len(settimana_generata)] = giorno_scelto
                 giorni_usati.add(key)
-                ingredienti_usati.add(ingrediente)
+                ingredienti_usati.append(ingrediente)
     
     # STEP 2: Riempi i giorni rimanenti con giorni casuali
     while len(settimana_generata) < 7:
@@ -807,7 +827,7 @@ async def visualizza_settimana_salvata(query, user_id, nome_settimana):
         
         keyboard.append([InlineKeyboardButton(
             f"📅 Giorno {giorno_num}: {giorno_nome}",
-            callback_data=f"visualizza_giorno_salvato_{nome_settimana}_{idx}"
+            callback_data=f"visualizza_giorno_salvato_{nome_settimana}#{idx}"
         )])
     
     keyboard.append([InlineKeyboardButton("🗑️ ELIMINA", callback_data=f"elimina_settimana_{nome_settimana}")])
