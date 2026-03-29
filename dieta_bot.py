@@ -259,7 +259,23 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Selezione categoria per creare settimana
     elif data.startswith("seleziona_cat_"):
         categoria = data.replace("seleziona_cat_", "")
-        await mostra_ingredienti_categoria(query, categoria, update.effective_user.id)
+        await mostra_ingredienti_categoria(query, categoria, update.effective_user.id, context)
+    
+    # Toggle ingrediente
+    elif data.startswith("toggle_ing_"):
+        parts = data.split("_", 2)
+        categoria = parts[2].rsplit("_", 1)[0]
+        ingrediente = parts[2].rsplit("_", 1)[1]
+        await toggle_ingrediente(query, categoria, ingrediente, update.effective_user.id, context)
+    
+    # Continua con prossima categoria
+    elif data.startswith("continua_categoria_"):
+        categoria = data.replace("continua_categoria_", "")
+        await mostra_prossima_categoria(query, categoria, update.effective_user.id, context)
+    
+    # Crea settimana
+    elif data == "crea_settimana_finale":
+        await genera_e_salva_settimana(query, update.effective_user.id, context)
 
 async def mostra_menu_principale(query):
     """Mostra il menu principale"""
@@ -369,18 +385,222 @@ async def mostra_ingredienti_categoria(query, categoria, user_id):
         await query.edit_message_text("❌ Nessun ingrediente trovato in questa categoria!")
         return
     
+    # Inizializza le scelte dell'utente se non esistono
+    if user_id not in context.user_data:
+        context.user_data[user_id] = {'ingredienti_selezionati': {}, 'categoria_corrente': categoria}
+    
     text = f"""
 *{categoria}*
 
 Seleziona gli ingredienti che vuoi nella tua settimana:
+(Clicca per toggle ☐/☑️)
 """
     
     keyboard = []
-    for ingrediente in sorted(ingredienti)[:20]:  # Limita a 20 per evitare troppe righe
-        keyboard.append([InlineKeyboardButton(f"☐ {ingrediente}", callback_data=f"toggle_ing_{categoria}_{ingrediente}")])
+    for ingrediente in sorted(ingredienti)[:15]:  # Limita a 15
+        checkbox = "☑️" if ingrediente in context.user_data[user_id]['ingredienti_selezionati'].get(categoria, {}) else "☐"
+        keyboard.append([InlineKeyboardButton(f"{checkbox} {ingrediente}", callback_data=f"toggle_ing_{categoria}_{ingrediente}")])
     
+    keyboard.append([InlineKeyboardButton("✅ CONTINUA", callback_data=f"continua_categoria_{categoria}")])
     keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="crea_settimana_start")])
     keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+
+# ============================================================
+# GENERAZIONE SETTIMANA PERSONALIZZATA
+# ============================================================
+
+def trova_giorni_con_ingrediente(ingrediente):
+    """Trova tutti i giorni che contengono un ingrediente"""
+    giorni_trovati = []
+    
+    for stagione_key, stagione_data in MENU.items():
+        for settimana_key, settimana_data in stagione_data.items():
+            for giorno, pasti_dict in settimana_data.items():
+                for pasto, descrizione in pasti_dict.items():
+                    if isinstance(descrizione, str) and ingrediente.lower() in descrizione.lower():
+                        giorni_trovati.append({
+                            'stagione': stagione_key,
+                            'settimana': settimana_key,
+                            'giorno': giorno,
+                            'menu': pasti_dict
+                        })
+                        break
+    
+    return giorni_trovati
+
+def genera_settimana_personalizzata(ingredienti_richiesti):
+    """Genera una settimana cercando di matchare gli ingredienti richiesti"""
+    settimana_generata = {}
+    ingredienti_usati = set()
+    giorni_usati = set()
+    
+    # STEP 1: Trova giorni che matchano gli ingredienti
+    for ingrediente in ingredienti_richiesti:
+        giorni_disponibili = trova_giorni_con_ingrediente(ingrediente)
+        
+        # Filtra i giorni già usati
+        giorni_disponibili = [g for g in giorni_disponibili if (g['stagione'], g['settimana'], g['giorno']) not in giorni_usati]
+        
+        if giorni_disponibili:
+            # Scegli un giorno casuale
+            giorno_scelto = random.choice(giorni_disponibili)
+            key = (giorno_scelto['stagione'], giorno_scelto['settimana'], giorno_scelto['giorno'])
+            
+            if len(settimana_generata) < 7:  # Max 7 giorni
+                settimana_generata[len(settimana_generata)] = giorno_scelto
+                giorni_usati.add(key)
+                ingredienti_usati.add(ingrediente)
+    
+    # STEP 2: Riempi i giorni rimanenti con giorni casuali
+    while len(settimana_generata) < 7:
+        stagione_random = random.choice(list(MENU.keys()))
+        settimana_random_key = random.choice(list(MENU[stagione_random].keys()))
+        giorno_random = random.choice(GIORNI)
+        
+        key = (stagione_random, settimana_random_key, giorno_random)
+        if key not in giorni_usati:
+            menu_giorno = MENU[stagione_random][settimana_random_key].get(giorno_random, {})
+            if menu_giorno:
+                settimana_generata[len(settimana_generata)] = {
+                    'stagione': stagione_random,
+                    'settimana': settimana_random_key,
+                    'giorno': giorno_random,
+                    'menu': menu_giorno
+                }
+                giorni_usati.add(key)
+    
+    return settimana_generata, ingredienti_usati
+
+def genera_settimana_personalizzata(ingredienti_richiesti):
+    """Genera una settimana cercando di matchare gli ingredienti richiesti"""
+    settimana_generata = {}
+    ingredienti_usati = set()
+    giorni_usati = set()
+    
+    # STEP 1: Trova giorni che matchano gli ingredienti
+    for ingrediente in ingredienti_richiesti:
+        giorni_disponibili = trova_giorni_con_ingrediente(ingrediente)
+        
+        # Filtra i giorni già usati
+        giorni_disponibili = [g for g in giorni_disponibili if (g['stagione'], g['settimana'], g['giorno']) not in giorni_usati]
+        
+        if giorni_disponibili:
+            # Scegli un giorno casuale
+            giorno_scelto = random.choice(giorni_disponibili)
+            key = (giorno_scelto['stagione'], giorno_scelto['settimana'], giorno_scelto['giorno'])
+            
+            if len(settimana_generata) < 7:  # Max 7 giorni
+                settimana_generata[len(settimana_generata)] = giorno_scelto
+                giorni_usati.add(key)
+                ingredienti_usati.add(ingrediente)
+    
+    # STEP 2: Riempi i giorni rimanenti con giorni casuali
+    while len(settimana_generata) < 7:
+        stagione_random = random.choice(list(MENU.keys()))
+        settimana_random_key = random.choice(list(MENU[stagione_random].keys()))
+        giorno_random = random.choice(GIORNI)
+        
+        key = (stagione_random, settimana_random_key, giorno_random)
+        if key not in giorni_usati:
+            menu_giorno = MENU[stagione_random][settimana_random_key].get(giorno_random, {})
+            if menu_giorno:
+                settimana_generata[len(settimana_generata)] = {
+                    'stagione': stagione_random,
+                    'settimana': settimana_random_key,
+                    'giorno': giorno_random,
+                    'menu': menu_giorno
+                }
+                giorni_usati.add(key)
+    
+    return settimana_generata, ingredienti_usati
+
+async def toggle_ingrediente(query, categoria, ingrediente, user_id, context):
+    """Toggle un ingrediente (aggiunge/rimuove dalla selezione)"""
+    if 'ingredienti_selezionati' not in context.user_data:
+        context.user_data['ingredienti_selezionati'] = {}
+    
+    if categoria not in context.user_data['ingredienti_selezionati']:
+        context.user_data['ingredienti_selezionati'][categoria] = set()
+    
+    if ingrediente in context.user_data['ingredienti_selezionati'][categoria]:
+        context.user_data['ingredienti_selezionati'][categoria].remove(ingrediente)
+    else:
+        context.user_data['ingredienti_selezionati'][categoria].add(ingrediente)
+    
+    # Rimostri la categoria con gli aggiornamenti
+    await mostra_ingredienti_categoria(query, categoria, user_id, context)
+
+async def mostra_prossima_categoria(query, categoria_corrente, user_id, context):
+    """Mostra la prossima categoria o il sommario"""
+    categorie_list = list(INGREDIENTI_CATEGORIZZATI.keys())
+    idx_corrente = categorie_list.index(categoria_corrente)
+    
+    if idx_corrente < len(categorie_list) - 1:
+        # Vai alla prossima categoria
+        prossima_categoria = categorie_list[idx_corrente + 1]
+        await mostra_ingredienti_categoria(query, prossima_categoria, user_id, context)
+    else:
+        # Fine selezione - mostra sommario e bottone CREA
+        await mostra_sommario_e_crea(query, user_id, context)
+
+async def mostra_sommario_e_crea(query, user_id, context):
+    """Mostra il sommario degli ingredienti selezionati e bottone CREA"""
+    text = "✨ *SOMMARIO INGREDIENTI SELEZIONATI*\n\n"
+    
+    totale_ingredienti = 0
+    for categoria, ingredienti in context.user_data.get('ingredienti_selezionati', {}).items():
+        if ingredienti:
+            text += f"{categoria}\n"
+            for ing in ingredienti:
+                text += f"  ☑️ {ing}\n"
+            totale_ingredienti += len(ingredienti)
+    
+    if totale_ingredienti == 0:
+        text += "❌ Nessun ingrediente selezionato!\n\nSeleziona almeno un ingrediente per creare la settimana."
+    else:
+        text += f"\n*Totale: {totale_ingredienti} ingredienti selezionati*\n\nClicca CREA SETTIMANA per generarla!"
+    
+    keyboard = []
+    if totale_ingredienti > 0:
+        keyboard.append([InlineKeyboardButton("🎯 CREA SETTIMANA", callback_data="crea_settimana_finale")])
+    keyboard.append([InlineKeyboardButton("⬅️ Modifica", callback_data="crea_settimana_start")])
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def genera_e_salva_settimana(query, user_id, context):
+    """Genera la settimana e chiede il nome per salvarla"""
+    # Raccogli tutti gli ingredienti selezionati
+    ingredienti_richiesti = []
+    for categoria, ingredienti in context.user_data.get('ingredienti_selezionati', {}).items():
+        ingredienti_richiesti.extend(list(ingredienti))
+    
+    if not ingredienti_richiesti:
+        await query.edit_message_text("❌ Nessun ingrediente selezionato!")
+        return
+    
+    # Genera la settimana
+    settimana, ingredienti_usati = genera_settimana_personalizzata(ingredienti_richiesti)
+    
+    # Salva in context per uso successivo
+    context.user_data['settimana_generata'] = settimana
+    
+    # Mostra la settimana generata
+    text = "🎉 *SETTIMANA GENERATA!*\n\n"
+    for idx, giorno_data in settimana.items():
+        giorno_num = idx + 1
+        text += f"*Giorno {giorno_num}: {giorno_data['giorno']}*\n"
+        text += f"({giorno_data['stagione']} - {giorno_data['settimana']})\n\n"
+    
+    keyboard = [
+        [InlineKeyboardButton("💾 SALVA SETTIMANA", callback_data="salva_settimana_nome")],
+        [InlineKeyboardButton("🏠 HOME", callback_data="home")],
+    ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
