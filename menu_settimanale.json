@@ -467,238 +467,256 @@
       }
     },
 
-    "SETTIMANA_5": {
-      "LUNEDI": {
-        "colazione": "Pane segale 50 g + 50-60 g hummus + pomodorini saltati",
-        "spuntino_1": "2 fette galbusera oppure 1 pacchetto crackers di legumi o protein G o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 gallette/wasa",
-        "pranzo": "60 g riso + 120 g lenticchie + zucca",
-        "spuntino_2": "1 ricotta + cacao + stevia + cocco in scaglie",
-        "cena": "50 g pane tostato + 1 burger di soia + cipolla caramellata + pomodori/insalata",
-        "dopo_cena": "1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "MARTEDI": {
-        "colazione": "Overnight porridge con mela e cannella + 1 cucchiaino crema di mandorle",
-        "spuntino_1": "2 fette galbusera oppure 1 pacchetto crackers di legumi/protein G/integrali galbusera. Se ti svegli dopo: 1 manciata frutta secca + 2 gallette/wasa",
-        "pranzo": "Insalata con 50 g tonno + 1 uovo sodo + pomodorini + mais + 50 g pane segale o integrale",
-        "spuntino_2": "Yogurt + 1 cucchiaio granola",
-        "cena": "150 g orata/branzino + pomodorini e olive + insalata mista + 3 wasa",
-        "dopo_cena": "1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "MERCOLEDI": {
-        "colazione": "50 g segale + 1/2 ricotta + miele + 1 manciata frutta secca",
-        "spuntino_1": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 gallette/wasa",
-        "pranzo": "70 g piadina integrale/farro/kamut + 120 g hummus + pomodori/insalata",
-        "spuntino_2": "3-4 noci pecan + 1 banana",
-        "cena": "Vellutata di zucca + 120 g ceci + 3 wasa",
-        "dopo_cena": "1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "GIOVEDI": {
-        "colazione": "Yogurt greco SL + 1 manciata frutta secca + 2 cucchiai granola + 1 kiwi",
-        "spuntino_1": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 gallette/wasa",
-        "pranzo": "120 g ceci in insalata + 1/2 avocado + pomodorini + valeriana + 50 g pane integrale",
-        "spuntino_2": "1 frutto + 1 manciata frutta secca",
-        "cena": "100 g ricotta / 100 g primo sale senza lattosio + insalata di finocchi/cavolo saltato + 50 g pane segale",
-        "dopo_cena": "1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "VENERDI": {
-        "colazione": "2 fette integrali + marmellata + 2 cucchiaini burro arachidi",
-        "spuntino_1": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 gallette/wasa",
-        "pranzo": "150 g gamberetti + 1/2 avocado + pomodorini + 50 g feta + 2 wasa",
-        "spuntino_2": "1 quadrato cioccolato fondente + 3 noci",
-        "cena": "Tempeh grigliato + paprika + insalata di finocchi noci e arancia + 3 wasa",
-        "dopo_cena": "1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "SABATO": {
-        "colazione": "50 g salmone affumicato + 1/2 avocado",
-        "spuntino_1": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 gallette/wasa",
-        "pranzo": "Trancio di trota salmonata + broccoli e cavolfiori + uvetta e pinoli + 50 g pane integrale",
-        "spuntino_2": "1 frutto + 1 manciata frutta secca",
-        "cena": "PASTO LIBERO (con moderazione)",
-        "dopo_cena": "1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "DOMENICA": {
-        "colazione": "1 fetta pane integrale + 1 uovo + 1/2 avocado + 1 spremuta",
-        "spuntino_1": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 gallette/wasa",
-        "pranzo": "Frittata di spinaci (2 uova) + cubetti di feta + broccoli e carote al vapore",
-        "spuntino_2": "1 frutto + 1 pezzo cioccolato",
-        "cena": "1 quadrato cioccolato 80% (facoltativo)",
-        "dopo_cena": "1 quadrato cioccolato 80% (facoltativo)"
-      }
-    },
-
-    "SETTIMANA_6": {
-      "LUNEDI": {
-        "colazione": "• 60 g riso nero\n• 70 g salmone affumicato e piselli",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 150 g gamberetti ½ avocado pomodorini 50 g feta\n• 2 wasa",
-        "spuntino_2": "• 1 ricotta\n• cacao\n• stevia\n• cocco in scaglie",
-        "cena": "• 50 g pane tostato\n• 50 g salmone affumicato\n• ½ avocado",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "MARTEDI": {
-        "colazione": "• Pane integrale 1 fetta\n• 2 cucchiaini burro arachidi\n• 2 cucchiaini marmellata",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 60 g riso\n• 70 g tofu carote zucchine\n• curry e latte di cocco",
-        "spuntino_2": "• Yogurt\n• 1 cucchiaio granola",
-        "cena": "• Minestrone di legumi 120 g\n• parmigiano\n• 30 g crostini",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "MERCOLEDI": {
-        "colazione": "• 1 yogurt intero greco\n• cereali all bran prebiotic\n• 2 cucchiaini semi di lino tritati",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 50 g pane di segale\n• 200 g fiocchi di latte senza lattosio e senza lattosio\n• fagioli",
-        "spuntino_2": "• 3-4 noci pecan\n• 1 banana",
-        "cena": "• Frittata\n• 2 uova\n• zucchine e carote saltate\n• latte\n• 2 wasa",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "GIOVEDI": {
-        "colazione": "• Porridge overnight\n• kiwi velo di yogurt e gocce di cioccolato",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 60 g miglio o riso\n• zucca e 120 g ceci",
-        "spuntino_2": "• Yogurt\n• 1 cucchiaio granola",
-        "cena": "• Tempeh grigliato\n• paprika\n• insalata di finocchi noci e arancia\n• 3 wasa",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "VENERDI": {
-        "colazione": "• Pane segale 50 g\n• 50 g hummus\n• pomodorini",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 1 quadrato cioccolato fondente\n• 3 noci",
-        "spuntino_2": "• 1 quadrato cioccolato fondente\n• 3 noci",
-        "cena": "• Zucca in padella\n• rosmarino o cavolo viola\n• 2 uova\n• insalata",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "SABATO": {
-        "colazione": "• Pane tostato 50 g\n• 50 g salmone affumicato\n• ½ avocado",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• Broccoli filanti\n• forno\n• formaggio a scelta senza lattosio 80 g\n• 50 g pane",
-        "spuntino_2": "• 1 frutto\n• 1 manciata frutta secca",
-        "cena": "• PASTO LIBERO (con moderazione)",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "DOMENICA": {
-        "colazione": "• Zucca in padella\n• rosmarino o cavolo viola\n• 120 g pesce e 200 g patate\n• insalata finocchi mela uvetta noci",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 150 g pesce e 200 g patate\n• insalata finocchi mela uvetta noci",
-        "spuntino_2": "• 1 frutto\n• 1 pezzo cioccolato",
-        "cena": "• Vellutata di zucca\n• 120 g ceci\n• rosmarino",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      }
-    },
-    "SETTIMANA_7": {
-      "LUNEDI": {
-        "colazione": "• Porridge\n• pera e cannella\n• 1 quadrato cioccolato o crema di mandorle 100%",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• Pane segale 50 g\n• 120 g hummus cannellini barbabietola\n• carote",
-        "spuntino_2": "• 1 ricotta\n• cacao\n• stevia\n• cocco in scaglie",
-        "cena": "• Minestrone di 120 g legumi\n• parmigiano\n• 30 g crostini",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "MARTEDI": {
-        "colazione": "• Pane segale 50 g\n• 50 g hummus\n• pomodorini",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 120 g gnocchi\n• pomodorini saltati e stracciatella senza lattosio",
-        "spuntino_2": "• Yogurt\n• 1 cucchiaio granola",
-        "cena": "• Frittata (2 uova) di spinaci\n• zucca in padella\n• 2 wasa",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "MERCOLEDI": {
-        "colazione": "• Torretta di 4 fette biscottate\n• strati di yogurt e marmellata 3 cucchiaini",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• Insalata 100 g ceci ½ avocado pomodorini 50 g pomodorini 50 g feta senza lattosio\n• 3 wasa",
-        "spuntino_2": "• Yogurt\n• 1 cucchiaio granola",
-        "cena": "• Polpette di tofu\n• pomodoro 70 g insalata finocchi/ arance e 3 noci\n• 50 g pane",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "GIOVEDI": {
-        "colazione": "• Pane tostato 50 g\n• 1 uovo strapazzate\n• ½ avocado",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• Insalata 2 mozzarella senza lattosio\n• scaglie di grana e noci\n• 50 g pane integrale",
-        "spuntino_2": "• 1 frutto\n• 1 manciata frutta secca",
-        "cena": "• Trancio di pesce in umido\n• insalata di cavolo\n• aceto\n• 2 wasa",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "VENERDI": {
-        "colazione": "• 1 toast integrale\n• 2 fette prosciutto e formaggio",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 60 g riso basmati\n• cavolo verza e 150 g fagiolini cannellini\n• curcuma",
-        "spuntino_2": "• 1 quadrato cioccolato fondente\n• 3 noci",
-        "cena": "• 50 g pane di segale\n• crema di ½ avocado e 2 uova\n• insalata",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "SABATO": {
-        "colazione": "• Gnocchi 120 g\n• crema di zucca\n• capriolo 70 g",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• Orata\n• forno (circa 150 g a persona)\n• patate\n• insalata mista",
-        "spuntino_2": "• 1 frutto\n• 1 manciata frutta secca",
-        "cena": "• PASTO LIBERO (con moderazione)",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "DOMENICA": {
-        "colazione": "• ½ panetto cubetti di tofu\n• latte di cocco e curry\n• carote/zucchine",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• Pesce\n• forno\n• patate\n• insalata di finocchi mela uvetta noci",
-        "spuntino_2": "• 1 frutto\n• 1 pezzo cioccolato",
-        "cena": "• Pesce\n• forno\n• patate\n• insalata di finocchi uvetta noci",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      }
-    },
-    "SETTIMANA_8": {
-      "LUNEDI": {
-        "colazione": "• Yogurt greco SL\n• 1 manciata frutta secca\n• 2 cucchiai granola\n• uva a pezzetti",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 60 g farro\n• 2 cucchiai pesto e pomodorini\n• 70 g cubetti tofu affumicato",
-        "spuntino_2": "• 1 ricotta\n• cacao\n• stevia\n• cocco in scaglie",
-        "cena": "• 120 g coniglio carciofi\n• 150 g patate\n• olive",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "MARTEDI": {
-        "colazione": "• 60 g farro\n• 2 cucchiai pesto e pomodorini\n• 70 g cubetti tofu affumicato",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 120 g lenticchie\n• zucca in padella\n• 2 wasa",
-        "spuntino_2": "• Yogurt\n• 1 frutto",
-        "cena": "• 150 g mozzarella senza lattosio\n• scaglie di grana e noci\n• 50 g pane integrale",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "MERCOLEDI": {
-        "colazione": "• 50 g pane segale\n• marmellata e burro arachidi",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 1 piadina integrale\n• hummus (120 g ceci)\n• melanzane grigliate",
-        "spuntino_2": "• 3-4 noci pecan\n• 1 banana",
-        "cena": "• 150 g filetto di trota salmonata\n• piselli e funghi\n• 50 g pane segale",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "GIOVEDI": {
-        "colazione": "• Overnight porridge 30 g fiocchi d'avena\n• mirtilli e cocco grattugiato",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 60 g riso basmati\n• 2 uova strapazzate cavolo saltato\n• olio di cocco",
-        "spuntino_2": "• Yogurt\n• 1 cucchiaio granola",
-        "cena": "• Zuppa di latte di cocco spinaci patate zucca 120 g ceci\n• 2 wasa",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "VENERDI": {
-        "colazione": "• 3 fette integrali\n• philadelphia e marmellata",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 60 g riso\n• zucca e lenticchie 120 g",
-        "spuntino_2": "• 1 quadrato cioccolato fondente\n• 3 noci",
-        "cena": "• 2 uova all'occhio di bue\n• 50 g pane segale\n• ½ avocado\n• insalata",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "SABATO": {
-        "colazione": "• 1 toast integrale\n• 2 fette prosciutto e formaggio",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• Broccoli filanti\n• forno\n• formaggio a scelta senza lattosio 80 g\n• 50 g pane",
-        "spuntino_2": "• 1 frutto\n• 1 manciata frutta secca",
-        "cena": "• PASTO LIBERO (con moderazione)",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      },
-      "DOMENICA": {
-        "colazione": "• Vellutata di zucca\n• 120 g ceci\n• rosmarino",
-        "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 1 quadrato cioccolato fondente\n• 3 noci",
-        "spuntino_2": "• 1 frutto\n• 1 pezzo cioccolato",
-        "cena": "• Pesce\n• forno\n• patate\n• insalata di finocchi mela uvetta noci",
-        "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
-      }
-    }
+"SETTIMANA_5": {
+  "LUNEDI": {
+    "colazione": "Pane segale 50 g + 50-60 g hummus + pomodorini saltati",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 wasa",
+    "pranzo": "60 g riso + 120 g lenticchie + zucca",
+    "spuntino_2": "1 ricotta + cacao + stevia + cocco in scaglie",
+    "cena": "50 g pane tostato + 1 burger di soia + cipolla caramellata + pomodoro/insalata",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+  "MARTEDI": {
+    "colazione": "Overnight porridge con mela e cannella + 1 cucchiaino crema di mandorle",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "Insalata con 50 g tonno + 1 uovo sodo + pomodorini + mais + 50 g pane segale o integrale",
+    "spuntino_2": "Yogurt + 1 cucchiaio granola",
+    "cena": "150 g orata/branzino con pomodorini e olive + insalata mista + 3 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+  "MERCOLEDI": {
+    "colazione": "50 g segale + 1/2 ricotta + miele + 2 noci",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "70 g piadina integrale o farro o kamut + 120 g hummus + pomodori/insalata",
+    "spuntino_2": "3-4 noci pecan + 1 banana",
+    "cena": "3 wasa + vellutata di zucca + 120 g ceci",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+  "GIOVEDI": {
+    "colazione": "Yogurt greco SL + 1 manciata frutta secca + 2 cucchiai granola + 1 kiwi",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "120 g ceci in insalata con 1/2 avocado, pomodorini, valeriana + 50 g pane segale o integrale",
+    "spuntino_2": "Yogurt + 1 cucchiaio granola",
+    "cena": "Insalata finocchi arance uvetta pinoli + 120 g coniglio olive pinoli + 2 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+  "VENERDI": {
+    "colazione": "2 fette integrali + marmellata + 2 cucchiaini burro arachidi",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "120 g gnocchi + 120 g piselli e funghi al latte di cocco + curcuma/curry",
+    "spuntino_2": "1 quadrato cioccolato fondente + 3 noci",
+    "cena": "100 g ricotta o primo sale SL + cavolo saltato + 50 g pane segale",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+  "SABATO": {
+    "colazione": "1 fetta pane integrale + velo philadelphia + marmellata",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "2 uova sode in insalata con 1/2 avocado + insalata mista + 50 g pane segale o integrale",
+    "spuntino_2": "1 frutto + 1 manciata frutta secca",
+    "cena": "PASTO LIBERO (con moderazione)",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+  "DOMENICA": {
+    "colazione": "1 fetta pane integrale + 1 uovo + 1/2 avocado + 1 spremuta",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "60 g spaghetti di riso con 1/2 tofu scrambled o gamberetti + carote zucchine salsa soia",
+    "spuntino_2": "1 frutto + 1 pezzo cioccolato",
+    "cena": "Frittata di spinaci (2 uova) + cubetti di feta + broccoli e carote al vapore",
+    "dopo_cena": "1 quadrato cioccolato 80%"
   }
+}
+
+"SETTIMANA_6": {
+  "LUNEDI": {
+    "colazione": "1 yogurt intero greco + cereali all bran prebiotic + 2 cucchiaini semi di lino tritati",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers di legumi/protein G/integrali o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 wasa",
+    "pranzo": "60 g riso nero con 70 g salmone affumicato e piselli",
+    "spuntino_2": "1 ricotta + cacao + stevia + cocco in scaglie",
+    "cena": "150 g gamberetti + 1/2 avocado + pomodorini + 50 g feta + 2 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "MARTEDI": {
+    "colazione": "Pane integrale 1 fetta + 2 cucchiaini burro arachidi + 2 cucchiaini marmellata",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "60 g riso con 70 g tofu + carote zucchine al curry e latte di cocco",
+    "spuntino_2": "Yogurt + 1 cucchiaio granola",
+    "cena": "Minestrone di legumi 120 g con verdure e lievito alimentare + 2 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "MERCOLEDI": {
+    "colazione": "1 yogurt intero greco + cereali all bran prebiotic + 2 cucchiaini semi di lino tritati",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "60 g cous cous + 70 g primo sale o feta senza lattosio + pomodorini/zucchine",
+    "spuntino_2": "3–4 noci pecan + 1 banana",
+    "cena": "Frittata con 2 uova + zucchine e carote saltate al latte + 2 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "GIOVEDI": {
+    "colazione": "Porridge overnight con kiwi, velo di yogurt e gocce di cioccolato",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "50 g pane di segale + 200 g fiocchi di latte senza lattosio + fagiolini",
+    "spuntino_2": "Yogurt + 1 cucchiaio granola",
+    "cena": "Vellutata di zucca + 120 g lenticchie + 3 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "VENERDI": {
+    "colazione": "Pane segale 50 g + 50 g hummus + pomodorini",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "60 g miglio o riso con zucca e 120 g ceci",
+    "spuntino_2": "1 quadrato cioccolato fondente + 3 noci",
+    "cena": "Tempeh grigliato con paprika + insalata di finocchi, noci e arancia + 3 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "SABATO": {
+    "colazione": "Pane tostato 50 g + 50 g salmone affumicato + 1/2 avocado",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "150 g orata/branzino con pomodorini e olive + insalata mista + patate 200 g",
+    "spuntino_2": "1 frutto + 1 manciata frutta secca",
+    "cena": "PASTO LIBERO (con moderazione)",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "DOMENICA": {
+    "colazione": "Pancake con farina di avena e albume + 1 quadrato cioccolato fondente",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "Trancio di trota salmonata + broccoli e cavolfiori con uvetta e pinoli + 50 g pane integrale",
+    "spuntino_2": "1 frutto + 1 pezzo cioccolato",
+    "cena": "Zucca in padella al rosmarino o cavolo viola + 2 uova",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  }
+}
+"SETTIMANA_7": {
+  "LUNEDI": {
+    "colazione": "Porridge con pera e cannella + 1 quadrato cioccolato o crema di mandorle 100%",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 wasa",
+    "pranzo": "Pane segale 50 g + 120 g hummus cannellini barbabietola + carote",
+    "spuntino_2": "1 ricotta + cacao + stevia + cocco in scaglie",
+    "cena": "Minestrone di 120 g legumi con parmigiano + 30 g crostini",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "MARTEDI": {
+    "colazione": "Pane segale 50 g + 50 g hummus + pomodorini",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "120 g gnocchi con pomodorini saltati e stracciatella senza lattosio",
+    "spuntino_2": "Yogurt + 1 cucchiaio granola",
+    "cena": "Frittata (2 uova) di spinaci + zucca in padella + 2 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "MERCOLEDI": {
+    "colazione": "Torretta di 4 fette biscottate con strati di yogurt e 3 cucchiaini marmellata",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "Insalata: 100 g ceci + 1/2 avocado + pomodorini + 50 g feta SL + 3 wasa",
+    "spuntino_2": "3–4 noci pecan + 1 banana",
+    "cena": "Polpette di tofu al pomodoro (70 g) + insalata finocchi/arance + 3 noci + 50 g pane",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "GIOVEDI": {
+    "colazione": "Pane tostato 50 g + 1 uovo strapazzato + 1/2 avocado",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "Insalata: 2 mozzarelline SL + pomodorini + 50 g tonno + 3 wasa",
+    "spuntino_2": "Yogurt + 1 cucchiaio granola",
+    "cena": "Trancio di pesce in umido + insalata di cavolo + aceto + 2 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "VENERDI": {
+    "colazione": "1 bicchiere di kefir + muesli + semi di lino/chia",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "60 g riso basmati + cavolo verza + 150 g fagioli cannellini alla curcuma",
+    "spuntino_2": "1 quadrato cioccolato fondente + 3 noci",
+    "cena": "50 g pane di segale con crema di 1/2 avocado e 2 uova + insalata",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "SABATO": {
+    "colazione": "Porridge con 1/2 banana, cannella e 1 quadrato cacao",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "Gnocchi 120 g + crema di zucca + caprino 70 g",
+    "spuntino_2": "1 frutto + 1 manciata frutta secca",
+    "cena": "PASTO LIBERO (con moderazione)",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "DOMENICA": {
+    "colazione": "1 toast integrale + 2 fette prosciutto e formaggio",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "Orata al forno (≈150 g) + patate al forno 200 g + insalata mista",
+    "spuntino_2": "1 frutto + 1 pezzo cioccolato",
+    "cena": "1/2 panetto tofu a cubetti con latte di cocco e curry + carote/zucchine",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  }
+}
+"SETTIMANA_8": {
+  "LUNEDI": {
+    "colazione": "Yogurt greco SL + 1 manciata frutta secca + 2 cucchiai granola + uva a pezzetti",
+    "spuntino": "2 fette galbusera oppure 1 pacchetto crackers legumi/protein G/integrali o 30 g chips probios. Se ti svegli dopo: 1 manciata frutta secca + 2 wasa",
+    "pranzo": "60 g farro con 2 cucchiai di pesto e pomodorini + 70 g cubetti di tofu affumicato",
+    "spuntino_2": "1 ricotta + cacao + stevia + cocco in scaglie",
+    "cena": "120 g coniglio con carciofi + 150 g patate con olive",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "MARTEDI": {
+    "colazione": "Overnight porridge con mela e cannella + 1 cucchiaino crema di mandorle",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "Insalata con 1 mozzarella SL, scaglie di grana e noci + 50 g pane integrale",
+    "spuntino_2": "Yogurt + 1 frutto",
+    "cena": "120 g lenticchie con zucca in padella + 2 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "MERCOLEDI": {
+    "colazione": "50 g pane segale + marmellata e burro arachidi",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "1 piadina integrale con hummus (120 g ceci) + zucchine/melanzane grigliate",
+    "spuntino_2": "3–4 noci pecan + 1 banana",
+    "cena": "150 g filetto di trota salmonata + piselli e funghi + 50 g pane segale",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "GIOVEDI": {
+    "colazione": "Overnight porridge 30 g fiocchi d’avena + mirtilli + cocco grattugiato",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "60 g riso basmati + 2 uova strapazzate + cavolo saltato con olio di cocco",
+    "spuntino_2": "Yogurt + 1 cucchiaio granola",
+    "cena": "Zuppa di latte di cocco con spinaci, patate, zucca + 120 g ceci + 2 wasa",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "VENERDI": {
+    "colazione": "3 fette integrali + philadelphia e marmellata",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "60 g riso con zucca e 120 g lenticchie",
+    "spuntino_2": "1 quadrato cioccolato fondente + 3 noci",
+    "cena": "2 uova all’occhio di bue + 50 g pane segale + 1/2 avocado + insalata",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "SABATO": {
+    "colazione": "1 toast integrale + 2 fette prosciutto e formaggio",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "Broccoli filanti al forno con formaggio SL 80 g + 50 g pane",
+    "spuntino_2": "1 frutto + 1 manciata frutta secca",
+    "cena": "PASTO LIBERO (con moderazione)",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  },
+
+  "DOMENICA": {
+    "colazione": "1 fetta pane integrale + 1 uovo + 1/2 avocado + 1 spremuta",
+    "spuntino": "2 fette galbusera oppure crackers legumi/protein G/integrali o 30 g chips probios",
+    "pranzo": "150 g pesce + 200 g patate + insalata finocchi mela uvetta noci",
+    "spuntino_2": "1 frutto + 1 pezzo cioccolato",
+    "cena": "Vellutata di zucca + 120 g ceci al rosmarino",
+    "dopo_cena": "1 quadrato cioccolato 80%"
+  }
+}
+}
 }
