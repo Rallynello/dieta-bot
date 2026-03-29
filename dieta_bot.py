@@ -221,6 +221,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         nome_settimana = data.replace("elimina_settimana_", "")
         await elimina_settimana_salvata(query, update.effective_user.id, nome_settimana)
     
+    # Visualizza giorno di una settimana salvata
+    elif data.startswith("visualizza_giorno_salvato_"):
+        parts = data.replace("visualizza_giorno_salvato_", "").split("_")
+        # Il nome_settimana potrebbe avere underscore, quindi l'ultimo elemento è l'indice
+        giorno_idx = parts[-1]
+        nome_settimana = "_".join(parts[:-1])
+        await visualizza_giorno_settimana_salvata(query, update.effective_user.id, nome_settimana, giorno_idx)
+    
     # Selezione categoria per creare settimana
     elif data.startswith("seleziona_cat_"):
         categoria = data.replace("seleziona_cat_", "")
@@ -232,6 +240,24 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         categoria = parts[2].rsplit("_", 1)[0]
         ingrediente = parts[2].rsplit("_", 1)[1]
         await toggle_ingrediente(query, categoria, ingrediente, update.effective_user.id, context)
+    
+    # Aumenta quantità ingrediente
+    elif data.startswith("inc_ing_"):
+        parts = data.replace("inc_ing_", "").rsplit("_", 1)
+        categoria = parts[0]
+        ingrediente = parts[1]
+        await modifica_quantita_ingrediente(query, categoria, ingrediente, 1, update.effective_user.id, context)
+    
+    # Diminuisce quantità ingrediente
+    elif data.startswith("dec_ing_"):
+        parts = data.replace("dec_ing_", "").rsplit("_", 1)
+        categoria = parts[0]
+        ingrediente = parts[1]
+        await modifica_quantita_ingrediente(query, categoria, ingrediente, -1, update.effective_user.id, context)
+    
+    # Mostra ingrediente (nessuna azione)
+    elif data.startswith("show_ing_"):
+        pass
     
     # Continua con prossima categoria
     elif data.startswith("continua_categoria_"):
@@ -352,7 +378,7 @@ Scegli una categoria per selezionare gli ingredienti:
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def mostra_ingredienti_categoria(query, categoria, user_id, context):
-    """Mostra gli ingredienti della categoria scelta"""
+    """Mostra gli ingredienti della categoria scelta con opzioni di quantità"""
     ingredienti = INGREDIENTI_CATEGORIZZATI.get(categoria, [])
     
     if not ingredienti:
@@ -364,23 +390,88 @@ async def mostra_ingredienti_categoria(query, categoria, user_id, context):
         context.user_data['ingredienti_selezionati'] = {}
     
     if categoria not in context.user_data['ingredienti_selezionati']:
-        context.user_data['ingredienti_selezionati'][categoria] = set()
+        context.user_data['ingredienti_selezionati'][categoria] = {}
     
     text = f"""
 *{categoria}*
 
 Seleziona gli ingredienti che vuoi nella tua settimana:
-(Clicca per toggle ☐/☑️)
+(Clicca sul numero per la quantità nella settimana)
 """
     
     keyboard = []
-    for ingrediente in sorted(ingredienti)[:15]:  # Limita a 15
-        checkbox = "☑️" if ingrediente in context.user_data['ingredienti_selezionati'][categoria] else "☐"
-        keyboard.append([InlineKeyboardButton(f"{checkbox} {ingrediente}", callback_data=f"toggle_ing_{categoria}_{ingrediente}")])
+    for ingrediente in sorted(ingredienti)[:12]:  # Limita a 12
+        quantita = context.user_data['ingredienti_selezionati'][categoria].get(ingrediente, 0)
+        label = f"{ingrediente} (x{quantita})" if quantita > 0 else ingrediente
+        keyboard.append([
+            InlineKeyboardButton(f"➕", callback_data=f"inc_ing_{categoria}_{ingrediente}"),
+            InlineKeyboardButton(label, callback_data=f"show_ing_{categoria}_{ingrediente}"),
+            InlineKeyboardButton(f"➖", callback_data=f"dec_ing_{categoria}_{ingrediente}")
+        ])
     
     keyboard.append([InlineKeyboardButton("✅ CONTINUA", callback_data=f"continua_categoria_{categoria}")])
     keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="crea_settimana_start")])
     keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def modifica_quantita_ingrediente(query, categoria, ingrediente, delta, user_id, context):
+    """Modifica la quantità di un ingrediente (aumenta o diminuisce)"""
+    if 'ingredienti_selezionati' not in context.user_data:
+        context.user_data['ingredienti_selezionati'] = {}
+    
+    if categoria not in context.user_data['ingredienti_selezionati']:
+        context.user_data['ingredienti_selezionati'][categoria] = {}
+    
+    quantita_attuale = context.user_data['ingredienti_selezionati'][categoria].get(ingrediente, 0)
+    nuova_quantita = max(0, quantita_attuale + delta)
+    
+    if nuova_quantita > 0:
+        context.user_data['ingredienti_selezionati'][categoria][ingrediente] = nuova_quantita
+    elif ingrediente in context.user_data['ingredienti_selezionati'][categoria]:
+        del context.user_data['ingredienti_selezionati'][categoria][ingrediente]
+    
+    # Ricarica la vista
+    await mostra_ingredienti_categoria(query, categoria, user_id, context)
+
+async def mostra_prossima_categoria(query, categoria_attuale, user_id, context):
+    """Mostra la prossima categoria o il riepilogo finale"""
+    categorie = list(INGREDIENTI_CATEGORIZZATI.keys())
+    idx_attuale = categorie.index(categoria_attuale)
+    
+    if idx_attuale + 1 < len(categorie):
+        # Mostra prossima categoria
+        prossima_categoria = categorie[idx_attuale + 1]
+        await mostra_ingredienti_categoria(query, prossima_categoria, user_id, context)
+    else:
+        # Mostra riepilogo e opzione per creare settimana
+        await mostra_riepilogo_ingredienti(query, user_id, context)
+
+async def mostra_riepilogo_ingredienti(query, user_id, context):
+    """Mostra il riepilogo degli ingredienti selezionati"""
+    if 'ingredienti_selezionati' not in context.user_data or not context.user_data['ingredienti_selezionati']:
+        await query.edit_message_text("❌ Nessun ingrediente selezionato!")
+        return
+    
+    text = "*📋 RIEPILOGO INGREDIENTI*\n\n"
+    
+    ingredienti_totali = []
+    for categoria, ingredienti in context.user_data['ingredienti_selezionati'].items():
+        if ingredienti:
+            text += f"{categoria}\n"
+            for ingrediente, quantita in sorted(ingredienti.items()):
+                text += f"  • {ingrediente} (x{quantita})\n"
+                ingredienti_totali.extend([ingrediente] * quantita)
+            text += "\n"
+    
+    text += f"\n*Totale richieste: {len(ingredienti_totali)}*"
+    
+    keyboard = [
+        [InlineKeyboardButton("✅ CREA SETTIMANA", callback_data="crea_settimana_finale")],
+        [InlineKeyboardButton("⬅️ Modifica", callback_data="crea_settimana_start")],
+        [InlineKeyboardButton("🏠 HOME", callback_data="home")]
+    ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
@@ -551,10 +642,12 @@ async def mostra_sommario_e_crea(query, user_id, context):
 
 async def genera_e_salva_settimana(query, user_id, context):
     """Genera la settimana e chiede il nome per salvarla"""
-    # Raccogli tutti gli ingredienti selezionati
+    # Raccogli tutti gli ingredienti selezionati con le quantità
     ingredienti_richiesti = []
-    for categoria, ingredienti in context.user_data.get('ingredienti_selezionati', {}).items():
-        ingredienti_richiesti.extend(list(ingredienti))
+    for categoria, ingredienti_dict in context.user_data.get('ingredienti_selezionati', {}).items():
+        # ingredienti_dict è ora un dizionario con {ingrediente: quantita}
+        for ingrediente, quantita in ingredienti_dict.items():
+            ingredienti_richiesti.extend([ingrediente] * quantita)
     
     if not ingredienti_richiesti:
         await query.edit_message_text("❌ Nessun ingrediente selezionato!")
@@ -678,7 +771,7 @@ async def mostra_mie_settimane(query, user_id):
     await query.edit_message_text(text, reply_markup=reply_markup)
 
 async def visualizza_settimana_salvata(query, user_id, nome_settimana):
-    """Visualizza una settimana salvata"""
+    """Visualizza una settimana salvata con bottoni per i giorni"""
     try:
         with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
             settimane_salvate = json.load(f)
@@ -702,24 +795,27 @@ async def visualizza_settimana_salvata(query, user_id, nome_settimana):
         await query.edit_message_text("❌ Dati settimana non validi!")
         return
     
-    text = f"📖 {nome_settimana}\n\nData creazione: {data_creazione}\n\n"
+    text = f"📖 *{nome_settimana}*\n\nData creazione: {data_creazione}\n\n*Scegli un giorno:*"
     
-    for idx, giorno_data in settimana.items():
-        try:
-            giorno_num = int(idx) + 1 if isinstance(idx, str) else idx + 1
-            text += f"Giorno {giorno_num}: {giorno_data['giorno']}\n"
-            text += f"({giorno_data['stagione']} - {giorno_data['settimana']})\n\n"
-        except Exception as e:
-            text += f"Giorno {idx}: Errore nel caricamento\n"
+    keyboard = []
     
-    keyboard = [
-        [InlineKeyboardButton("🗑️ ELIMINA", callback_data=f"elimina_settimana_{nome_settimana}")],
-        [InlineKeyboardButton("⬅️ Indietro", callback_data="mie_settimane_start")],
-        [InlineKeyboardButton("🏠 HOME", callback_data="home")]
-    ]
+    # Crea bottoni per ogni giorno
+    for idx in sorted([int(i) for i in settimana.keys()]):
+        giorno_data = settimana[str(idx)]
+        giorno_num = idx + 1
+        giorno_nome = giorno_data.get('giorno', 'Giorno sconosciuto')
+        
+        keyboard.append([InlineKeyboardButton(
+            f"📅 Giorno {giorno_num}: {giorno_nome}",
+            callback_data=f"visualizza_giorno_salvato_{nome_settimana}_{idx}"
+        )])
+    
+    keyboard.append([InlineKeyboardButton("🗑️ ELIMINA", callback_data=f"elimina_settimana_{nome_settimana}")])
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="mie_settimane_start")])
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(text, reply_markup=reply_markup)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def elimina_settimana_salvata(query, user_id, nome_settimana):
     """Elimina una settimana salvata"""
@@ -740,6 +836,44 @@ async def elimina_settimana_salvata(query, user_id, nome_settimana):
         await mostra_mie_settimane(query, user_id)
     else:
         await query.edit_message_text("❌ Settimana non trovata!")
+
+async def visualizza_giorno_settimana_salvata(query, user_id, nome_settimana, giorno_idx):
+    """Visualizza un giorno specifico di una settimana salvata"""
+    try:
+        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
+            settimane_salvate = json.load(f)
+    except FileNotFoundError:
+        await query.edit_message_text("❌ File settimane non trovato!")
+        return
+    
+    settimana = settimane_salvate.get(str(user_id), {}).get(nome_settimana, {}).get('settimana', {})
+    giorno_data = settimana.get(str(giorno_idx))
+    
+    if not giorno_data:
+        await query.edit_message_text("❌ Giorno non trovato!")
+        return
+    
+    giorno_num = int(giorno_idx) + 1
+    giorno_nome = giorno_data.get('giorno', 'Sconosciuto')
+    stagione = giorno_data.get('stagione', 'Sconosciuta')
+    settimana_nome = giorno_data.get('settimana', 'Sconosciuta')
+    
+    text = f"📅 *Giorno {giorno_num}: {giorno_nome}*\n\n"
+    text += f"({stagione} - {settimana_nome})\n\n"
+    
+    # Mostra i pasti del giorno
+    for pasto, descrizione in giorno_data.items():
+        if pasto not in ['giorno', 'stagione', 'settimana']:
+            if isinstance(descrizione, str):
+                text += f"*{pasto.upper()}*\n{descrizione}\n\n"
+    
+    keyboard = [
+        [InlineKeyboardButton("⬅️ Indietro", callback_data=f"visualizza_settimana_{nome_settimana}")],
+        [InlineKeyboardButton("🏠 HOME", callback_data="home")]
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def salva_settimana_con_nome_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Wrapper per gestire il salvataggio della settimana"""
