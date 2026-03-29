@@ -377,6 +377,40 @@ Scegli una categoria per selezionare gli ingredienti:
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
+async def mostra_ingredienti_categoria(query, categoria, user_id, context):
+    """Mostra gli ingredienti della categoria scelta"""
+    ingredienti = INGREDIENTI_CATEGORIZZATI.get(categoria, [])
+    
+    if not ingredienti:
+        await query.edit_message_text("❌ Nessun ingrediente trovato in questa categoria!")
+        return
+    
+    # Inizializza le scelte dell'utente se non esistono
+    if 'ingredienti_selezionati' not in context.user_data:
+        context.user_data['ingredienti_selezionati'] = {}
+    
+    if categoria not in context.user_data['ingredienti_selezionati']:
+        context.user_data['ingredienti_selezionati'][categoria] = set()
+    
+    text = f"""
+*{categoria}*
+
+Seleziona gli ingredienti che vuoi nella tua settimana:
+(Clicca per toggle ☐/☑️)
+"""
+    
+    keyboard = []
+    for ingrediente in sorted(ingredienti)[:15]:  # Limita a 15
+        checkbox = "☑️" if ingrediente in context.user_data['ingredienti_selezionati'][categoria] else "☐"
+        keyboard.append([InlineKeyboardButton(f"{checkbox} {ingrediente}", callback_data=f"toggle_ing_{categoria}_{ingrediente}")])
+    
+    keyboard.append([InlineKeyboardButton("✅ CONTINUA", callback_data=f"continua_categoria_{categoria}")])
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="crea_settimana_start")])
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
 # ============================================================
 # GENERAZIONE SETTIMANA PERSONALIZZATA
 # ============================================================
