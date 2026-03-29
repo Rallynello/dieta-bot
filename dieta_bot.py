@@ -255,6 +255,11 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # LE MIE SETTIMANE
     elif data == "mie_settimane_start":
         await mostra_mie_settimane(query, update.effective_user.id)
+    
+    # Selezione categoria per creare settimana
+    elif data.startswith("seleziona_cat_"):
+        categoria = data.replace("seleziona_cat_", "")
+        await mostra_ingredienti_categoria(query, categoria, update.effective_user.id)
 
 async def mostra_menu_principale(query):
     """Mostra il menu principale"""
@@ -351,6 +356,30 @@ Scegli una categoria per selezionare gli ingredienti:
     for categoria in INGREDIENTI_CATEGORIZZATI.keys():
         keyboard.append([InlineKeyboardButton(categoria, callback_data=f"seleziona_cat_{categoria}")])
     
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def mostra_ingredienti_categoria(query, categoria, user_id):
+    """Mostra gli ingredienti della categoria scelta"""
+    ingredienti = INGREDIENTI_CATEGORIZZATI.get(categoria, [])
+    
+    if not ingredienti:
+        await query.edit_message_text("❌ Nessun ingrediente trovato in questa categoria!")
+        return
+    
+    text = f"""
+*{categoria}*
+
+Seleziona gli ingredienti che vuoi nella tua settimana:
+"""
+    
+    keyboard = []
+    for ingrediente in sorted(ingredienti)[:20]:  # Limita a 20 per evitare troppe righe
+        keyboard.append([InlineKeyboardButton(f"☐ {ingrediente}", callback_data=f"toggle_ing_{categoria}_{ingrediente}")])
+    
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="crea_settimana_start")])
     keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
