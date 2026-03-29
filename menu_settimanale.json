@@ -244,11 +244,11 @@
         "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
       },
       "MARTEDI": {
-        "colazione": "• Overnight porridge\n• mela cannella\n• 1 cucchiaino crema di mandorle",
+        "colazione": "• Overnight porridge mela cannella\n• 1 cucchiaino crema di mandorle",
         "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 60 g riso\n• 2 uova strapazzate piselli zucchine carote\n• curry",
+        "pranzo": "• 60 g riso\n• 2 uova strapazzate piselli zucchine carote al curry\n",
         "spuntino_2": "• Yogurt\n• 1 cucchiaio granola",
-        "cena": "• Merluzzo infarinato\n• mais\n• 3 wasa fibre\n• spinaci",
+        "cena": "• Merluzzo infarinato con mais\n• 3 wasa fibre\n• spinaci",
         "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
       },
       "MERCOLEDI": {
@@ -270,7 +270,7 @@
       "VENERDI": {
         "colazione": "• 2 fette integrali\n• marmellata\n• 2 cucchiaini burro arachidi",
         "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 60 g pasta integrale\n• dente\n• broccoli e 70 g feta",
+        "pranzo": "• 60 g pasta integrale al dente\n• broccoli\n• 70 g feta",
         "spuntino_2": "• 1 quadrato cioccolato fondente\n• 3 noci",
         "cena": "• Patate dolci paprika all'olio di cocco 200 g\n• 1 trancio salmone gratinato\n• porri saltati",
         "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
@@ -288,7 +288,7 @@
         "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
         "pranzo": "• 120 g gnocchi\n• 120 g piselli\n• funghi\n• latte di cocco e curcuma",
         "spuntino_2": "• 1 frutto\n• 1 pezzo cioccolato",
-        "cena": "• Vellutata latte di cocco zucca patate\n• 70-80 g tempeh grigliato\n• 3 wasa\n• paprika",
+        "cena": "• Vellutata latte di cocco zucca patate\n• 70-80 g tempeh grigliato con paprika\n• 3 wasa",
         "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
       }
     },
@@ -296,7 +296,7 @@
       "LUNEDI": {
         "colazione": "• 1 yogurt intero greco\n• cereali all bran prebiotic\n• 2 cucchiaini semi di lino tritati",
         "spuntino_1": "• 2 fette galbusera. Oppure 1 pacchetto crackers di legumi o protein G (es. misura) o integrali galbusera. Se ti svegli dopo: 1 manciata frutta secca\n• 2 gallette/wasa",
-        "pranzo": "• 60 g pasta di avena\n• 120 g piselli funghi latte cocco\n• curcuma",
+        "pranzo": "• 60 g pasta di avena\n• 120 g piselli funghi latte cocco con curcuma",
         "spuntino_2": "• 1 ricotta\n• cacao\n• stevia\n• cocco in scaglie",
         "cena": "• 50 g pane integrale\n• insalata 120 g ceci ½ avocado pomodorini 100 g gamberi",
         "dopo_cena": "• 1 quadrato cioccolato 80% (facoltativo)"
