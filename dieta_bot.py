@@ -62,6 +62,9 @@ def estrai_e_categorizza_ingredienti():
         '🧀 LATTICINI': latticini_keywords
     }
     
+    # Unità di misura da escludere
+    unita_misura = ['g', 'gr', 'ml', 'l', 'dl', 'cl', 'kg', 'mg', 'fetta', 'fette', 'etto', 'ettì', 'tazza', 'cucchiaio', 'cucchiaini']
+    
     # Estrai ingredienti da tutte le settimane
     tutti_ingredienti = set()
     
@@ -83,6 +86,14 @@ def estrai_e_categorizza_ingredienti():
         
         # Pulisci l'ingrediente
         ing_clean = ingrediente.strip()
+        
+        # Scarta se è un numero o unità di misura
+        if ing_clean.isdigit() or ing_clean in unita_misura:
+            continue
+        
+        # Scarta se contiene solo numeri con caratteri speciali
+        if any(c.isalpha() for c in ing_clean) == False:
+            continue
         
         # Verifica in quale categoria va
         trovato = False
