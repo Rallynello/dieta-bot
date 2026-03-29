@@ -256,6 +256,16 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "mie_settimane_start":
         await mostra_mie_settimane(query, update.effective_user.id)
     
+    # Visualizza settimana salvata
+    elif data.startswith("visualizza_settimana_"):
+        nome_settimana = data.replace("visualizza_settimana_", "")
+        await visualizza_settimana_salvata(query, update.effective_user.id, nome_settimana)
+    
+    # Elimina settimana salvata
+    elif data.startswith("elimina_settimana_"):
+        nome_settimana = data.replace("elimina_settimana_", "")
+        await elimina_settimana_salvata(query, update.effective_user.id, nome_settimana)
+    
     # Selezione categoria per creare settimana
     elif data.startswith("seleziona_cat_"):
         categoria = data.replace("seleziona_cat_", "")
@@ -680,19 +690,91 @@ Puoi visualizzarla in "LE MIE SETTIMANE"
 
 async def mostra_mie_settimane(query, user_id):
     """Mostra le settimane salvate dall'utente"""
-    text = """
-📁 *LE MIE SETTIMANE*
+    try:
+        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
+            settimane_salvate = json.load(f)
+    except FileNotFoundError:
+        text = "📁 LE MIE SETTIMANE\n\n❌ Non hai ancora salvato nessuna settimana!"
+        keyboard = [[InlineKeyboardButton("🏠 HOME", callback_data="home")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(text, reply_markup=reply_markup)
+        return
+    
+    utente_settimane = settimane_salvate.get(str(user_id), {})
+    
+    if not utente_settimane:
+        text = "📁 LE MIE SETTIMANE\n\n❌ Non hai ancora salvato nessuna settimana!"
+        keyboard = [[InlineKeyboardButton("🏠 HOME", callback_data="home")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(text, reply_markup=reply_markup)
+        return
+    
+    text = "📁 LE MIE SETTIMANE\n\n"
+    keyboard = []
+    
+    for idx, (nome_settimana, dati) in enumerate(utente_settimane.items()):
+        data_creazione = dati.get('data_creazione', 'N/A')
+        text += f"{idx + 1}. {nome_settimana}\n   ({data_creazione})\n\n"
+        keyboard.append([InlineKeyboardButton(f"📖 Visualizza: {nome_settimana}", callback_data=f"visualizza_settimana_{nome_settimana}")])
+    
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup)
 
-Funzionalità in fase di sviluppo.
-Presto potrai visualizzare, salvare e eliminare le tue settimane personalizzate!
-"""
+async def visualizza_settimana_salvata(query, user_id, nome_settimana):
+    """Visualizza una settimana salvata"""
+    try:
+        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
+            settimane_salvate = json.load(f)
+    except FileNotFoundError:
+        await query.edit_message_text("❌ Errore: file settimane non trovato!")
+        return
+    
+    dati_settimana = settimane_salvate.get(str(user_id), {}).get(nome_settimana)
+    
+    if not dati_settimana:
+        await query.edit_message_text("❌ Settimana non trovata!")
+        return
+    
+    settimana = dati_settimana.get('settimana', {})
+    data_creazione = dati_settimana.get('data_creazione', 'N/A')
+    
+    text = f"📖 {nome_settimana}\n\nData creazione: {data_creazione}\n\n"
+    
+    for idx, giorno_data in settimana.items():
+        giorno_num = idx + 1
+        text += f"Giorno {giorno_num}: {giorno_data['giorno']}\n"
+        text += f"({giorno_data['stagione']} - {giorno_data['settimana']})\n\n"
     
     keyboard = [
+        [InlineKeyboardButton("🗑️ ELIMINA", callback_data=f"elimina_settimana_{nome_settimana}")],
+        [InlineKeyboardButton("⬅️ Indietro", callback_data="mie_settimane_start")],
         [InlineKeyboardButton("🏠 HOME", callback_data="home")]
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+    await query.edit_message_text(text, reply_markup=reply_markup)
+
+async def elimina_settimana_salvata(query, user_id, nome_settimana):
+    """Elimina una settimana salvata"""
+    try:
+        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
+            settimane_salvate = json.load(f)
+    except FileNotFoundError:
+        await query.edit_message_text("❌ Errore: file settimane non trovato!")
+        return
+    
+    if str(user_id) in settimane_salvate and nome_settimana in settimane_salvate[str(user_id)]:
+        del settimane_salvate[str(user_id)][nome_settimana]
+        
+        with open('settimane_salvate.json', 'w', encoding='utf-8') as f:
+            json.dump(settimane_salvate, f, ensure_ascii=False, indent=2)
+        
+        await query.edit_message_text(f"✅ Settimana '{nome_settimana}' eliminata!")
+        await mostra_mie_settimane(query, user_id)
+    else:
+        await query.edit_message_text("❌ Settimana non trovata!")
 
 async def salva_settimana_con_nome_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Wrapper per gestire il salvataggio della settimana"""
