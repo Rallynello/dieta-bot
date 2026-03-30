@@ -83,7 +83,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     frase_motivazionale = random.choice(FRASI_MOTIVAZIONALI)
     
     text = f"""
-Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
+Benvenuta, 🥗 sono il tuo assistente virtuale 🤖
 
 {frase_motivazionale}
 """
@@ -361,7 +361,7 @@ async def mostra_menu_principale(query):
     frase_motivazionale = random.choice(FRASI_MOTIVAZIONALI)
     
     text = f"""
-Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
+Benvenuta, 🥗 sono il tuo assistente virtuale 🤖
 
 {frase_motivazionale}
 """
