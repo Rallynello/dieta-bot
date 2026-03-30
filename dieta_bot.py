@@ -51,10 +51,14 @@ def estrai_e_categorizza_ingredienti():
             emoji_map = {
                 'verdure': '🥬 VERDURE',
                 'frutta': '🍎 FRUTTA',
-                'proteine': '🍗 PROTEINE',
-                'carboidrati': '🥕 CARBOIDRATI',
+                'proteine_animali': '🍗 PROTEINE ANIMALI',
+                'proteine_vegetali': '🌱 PROTEINE VEGETALI',
+                'carboidrati_amidacei': '🥕 CARBOIDRATI',
+                'cereali': '🌾 CEREALI',
                 'latticini': '🧀 LATTICINI',
-                'condimenti': '🧂 CONDIMENTI'
+                'condimenti': '🧂 CONDIMENTI',
+                'dolci_snack': '🍫 DOLCI & SNACK',
+                'altro': '📌 ALTRO'
             }
             for categoria, lista in data.items():
                 emoji_categoria = emoji_map.get(categoria, f'📌 {categoria.upper()}')
