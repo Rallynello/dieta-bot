@@ -45,8 +45,11 @@ def estrai_e_categorizza_ingredienti():
     """Carica gli ingredienti dal file pulito"""
     try:
         with open('ingredienti_definitivi.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
+            data = json.load(f)
+            logger.info(f"✅ Ingredienti caricati: {len(data)} categorie")
+            return data
     except FileNotFoundError:
+        logger.error("❌ File ingredienti_definitivi.json NON trovato!")
         # Fallback: lista di base se il file non esiste
         return {
             '🥬 VERDURE': ['Carote', 'Spinaci', 'Broccoli', 'Zucchine', 'Pomodori'],
