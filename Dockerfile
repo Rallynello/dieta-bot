@@ -8,5 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY dieta_bot.py .
 COPY menu_settimanale.json .
 COPY frasimotivazionali.txt .
+COPY ingredienti_categorizzati.json .
 
 CMD ["python3", "dieta_bot.py"]
