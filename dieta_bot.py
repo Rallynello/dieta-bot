@@ -193,7 +193,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         stagione = parts[1]
         settimana = parts[2]
         giorno_idx = int(parts[3])
-        await mostra_menu_giorno(query, stagione, f"SETTIMANA_{settimana}", giorno_idx)
+        await mostra_menu_giorno(query, stagione, f"SETTIMANA_{settimana}", giorno_idx, context)
     
     # Torna a inizio
     elif data == "home":
@@ -388,7 +388,7 @@ async def mostra_giorni_settimana(query, stagione, settimana):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
-async def mostra_menu_giorno(query, stagione, settimana, giorno_idx):
+async def mostra_menu_giorno(query, stagione, settimana, giorno_idx, context=None):
     """Mostra il menu di un giorno specifico"""
     giorno = GIORNI[giorno_idx]
     menu_giorno = MENU[stagione][settimana][giorno]
