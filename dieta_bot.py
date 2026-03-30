@@ -177,6 +177,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Selezione stagione
     if data.startswith("stagione_"):
+        context.user_data['ricerca_risultati'] = None
         stagione = data.split("_")[1]
         await mostra_settimane(query, stagione)
     
