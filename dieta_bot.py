@@ -102,7 +102,12 @@ Il bot ti mostrerà tutte le settimane e i giorni dove appare!
 
 async def cerca_ingrediente(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Cerca un ingrediente nel menu"""
+    # Se non siamo in modalità ricerca, ignora
+    if not context.user_data.get('in_ricerca'):
+        return
+    
     ingrediente = update.message.text.lower().strip()
+    context.user_data['in_ricerca'] = False
     
     if len(ingrediente) < 2:
         await update.message.reply_text("❌ Scrivi almeno 2 caratteri per cercare un ingrediente!")
