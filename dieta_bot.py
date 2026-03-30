@@ -133,6 +133,10 @@ async def cerca_ingrediente(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Non ho trovato '{ingrediente}' nel menu!")
         return
     
+    # Salva i risultati per la navigazione
+    context.user_data['ricerca_risultati'] = risultati
+    context.user_data['ricerca_ingrediente'] = ingrediente
+    
     # Formato risposta con bottoni
     text = f"🔍 *RISULTATI PER: {ingrediente.upper()}*\n\n"
     keyboard = []
@@ -203,6 +207,44 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "(es: pollo, pesce, riso, carote...)\n\n"
             "Il bot cercherà automaticamente nel menu!"
         )
+    
+    # Visualizza di nuovo i risultati ricerca
+    elif data == "ricerca_risultati_view":
+        risultati = context.user_data.get('ricerca_risultati', {})
+        ingrediente = context.user_data.get('ricerca_ingrediente', '')
+        
+        if not risultati:
+            await query.edit_message_text("❌ Risultati non trovati. Fai una nuova ricerca!")
+            return
+        
+        text = f"🔍 *RISULTATI PER: {ingrediente.upper()}*\n\n"
+        keyboard = []
+        
+        for stagione_key, stagioni_data in sorted(risultati.items()):
+            text += f"📅 *{stagione_key}*\n"
+            
+            for settimana_key, settimana_data in sorted(stagioni_data.items()):
+                settimana_num = settimana_key.split("_")[1]
+                text += f"  📌 Settimana {settimana_num}\n"
+                
+                for giorno in GIORNI:
+                    if giorno in settimana_data:
+                        text += f"    • {giorno}\n"
+                        for item in settimana_data[giorno]:
+                            emoji = EMOJI_PASTI.get(item["pasto"], "🍴")
+                            pasto_nome = item["pasto"].replace("_", " ").capitalize()
+                            text += f"      {emoji} {pasto_nome}\n"
+                        
+                        giorno_idx = GIORNI.index(giorno)
+                        button_text = f"📆 {stagione_key} S{settimana_num} {giorno}"
+                        keyboard.append([InlineKeyboardButton(button_text, callback_data=f"giorno_{stagione_key}_{settimana_num}_{giorno_idx}")])
+            
+            text += "\n"
+        
+        keyboard.append([InlineKeyboardButton("🔍 NUOVA RICERCA", callback_data="ricerca_start")])
+        keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
     
     # Torna alle settimane
     elif data.startswith("back_settimane_"):
@@ -369,9 +411,16 @@ async def mostra_menu_giorno(query, stagione, settimana, giorno_idx):
                              callback_data=f"giorno_{stagione}_{settimana_num}_{giorno_idx - 1}" if giorno_idx > 0 else "skip"),
          InlineKeyboardButton("Giorno Successivo ➡️" if giorno_idx < len(GIORNI) - 1 else "➡️",
                              callback_data=f"giorno_{stagione}_{settimana_num}_{giorno_idx + 1}" if giorno_idx < len(GIORNI) - 1 else "skip")],
-        [InlineKeyboardButton("⬅️ Giorni", callback_data=f"back_giorni_{stagione}_{settimana_num}")],
-        [InlineKeyboardButton("🏠 HOME", callback_data="home")],
     ]
+    
+    # Se viene dalla ricerca, mostra bottone "Torna ai risultati"
+    if context.user_data.get('ricerca_risultati'):
+        keyboard.append([InlineKeyboardButton("⬅️ Torna ai risultati", callback_data="ricerca_risultati_view")])
+        keyboard.append([InlineKeyboardButton("📅 Vedi tutta la settimana", callback_data=f"back_giorni_{stagione}_{settimana_num}")])
+    else:
+        keyboard.append([InlineKeyboardButton("⬅️ Giorni", callback_data=f"back_giorni_{stagione}_{settimana_num}")])
+    
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
