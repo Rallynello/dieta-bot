@@ -159,6 +159,7 @@ async def cerca_ingrediente(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         text += "\n"
     
+    keyboard.append([InlineKeyboardButton("🔍 NUOVA RICERCA", callback_data="ricerca_start")])
     keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
@@ -307,6 +308,7 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
     keyboard = [
         [InlineKeyboardButton("☀️ ESTATE", callback_data="stagione_ESTATE")],
         [InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")],
+        [InlineKeyboardButton("🔍 RICERCA", callback_data="ricerca_start")],
         [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
         [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
     ]
