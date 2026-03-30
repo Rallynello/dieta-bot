@@ -909,10 +909,9 @@ async def visualizza_giorno_settimana_salvata(query, user_id, nome_settimana, gi
 
 async def salva_settimana_con_nome_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Wrapper per gestire il salvataggio della settimana"""
-    if context.user_data.get('in_salvataggio'):
-        await salva_settimana_con_nome(update, context)
-        return True
-    return False
+    if not context.user_data.get('in_salvataggio'):
+        return
+    await salva_settimana_con_nome(update, context)
 
 # ============================================================
 # MAIN
@@ -931,8 +930,8 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CallbackQueryHandler(button_callback))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, salva_settimana_con_nome_wrapper))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, cerca_ingrediente))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, salva_settimana_con_nome_wrapper))
     
     print("🚀 Bot avviato! Premi Ctrl+C per fermare.")
     app.run_polling()
