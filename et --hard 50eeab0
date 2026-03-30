@@ -1,0 +1,30 @@
+[33m3746057[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix JSON encoding to UTF-8
+[33md268eb0[m Add menu_settimanale.json to dieta-bot directory
+[33m1269d37[m Restore working menu_settimanale.json and fix day name case
+[33m259f7b9[m Restore working menu_settimanale.json
+[33m99f7f71[m Fix: convert day names to lowercase for JSON access
+[33m114130c[m Fix menu JSON lowercase keys
+[33md0331b0[m Fix day menu JSON key access
+[33m2d8a707[m Fix case sensitivity for season keys
+[33mebfcace[m Fix winter weeks structure and menu keys
+[33mf7fb774[m Fix: add complete menu file
+[33m3d3eb7e[m Add complete accurate menu
+[33mcbe5355[m Extract all ingredients from all weeks
+[33m777377b[m Fix day viewer for saved weeks
+[33m50eeab0[m Fix saved week day viewer and improve quantity matching
+[33mf64d633[m Add ingredient quantity selection with +/- buttons
+[33m6500955[m Use clean, manually curated ingredient list
+[33m1d229e5[m Add better error handling for viewing saved weeks
+[33mf90fd55[m Remove numbers and units from ingredient list
+[33m64fed41[m Implement view and delete saved weeks functionality
+[33md62cb94[m Add week saving functionality with custom names
+[33m05cb7b4[m Add mostra_ingredienti_categoria function
+[33mb219b7c[m Fix mostra_ingredienti_categoria function signature
+[33mb37c555[m Add complete personalized week generation logic
+[33m360174c[m Add ingredient selection for personalized week
+[33m0fe2471[m Add personalized week feature
+[33me1f09c5[m Add all bot files
+[33mb2f2dd3[m Add Dockerfile
+[33mda44b24[m Add railway.json with start command
+[33m6e12029[m Add diet bot files
+[33md211148[m Initial commit

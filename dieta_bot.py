@@ -73,6 +73,7 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
     keyboard = [
         [InlineKeyboardButton("☀️ ESTATE", callback_data="stagione_ESTATE")],
         [InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")],
+        [InlineKeyboardButton("🔍 RICERCA", callback_data="ricerca_start")],
         [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
         [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
     ]
@@ -190,6 +191,16 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Torna a inizio
     elif data == "home":
         await mostra_menu_principale(query)
+    
+    # Ricerca ingrediente
+    elif data == "ricerca_start":
+        await query.edit_message_text(
+            "🔍 *RICERCA INGREDIENTE*\n\n"
+            "Scrivi l'ingrediente che cerchi:\n"
+            "(es: pollo, pesce, riso, carote...)",
+            parse_mode="Markdown"
+        )
+        context.user_data['in_ricerca'] = True
     
     # Torna alle settimane
     elif data.startswith("back_settimane_"):
