@@ -909,6 +909,8 @@ async def salva_settimana_con_nome_wrapper(update: Update, context: ContextTypes
     """Wrapper per gestire il salvataggio della settimana"""
     if context.user_data.get('in_salvataggio'):
         await salva_settimana_con_nome(update, context)
+        return True
+    return False
 
 # ============================================================
 # MAIN
