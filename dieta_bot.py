@@ -102,12 +102,7 @@ Il bot ti mostrerà tutte le settimane e i giorni dove appare!
 
 async def cerca_ingrediente(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Cerca un ingrediente nel menu"""
-    # Se non siamo in modalità ricerca, ignora
-    if not context.user_data.get('in_ricerca'):
-        return
-    
     ingrediente = update.message.text.lower().strip()
-    context.user_data['in_ricerca'] = False
     
     if len(ingrediente) < 2:
         await update.message.reply_text("❌ Scrivi almeno 2 caratteri per cercare un ingrediente!")
@@ -201,11 +196,10 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "ricerca_start":
         await query.edit_message_text(
             "🔍 *RICERCA INGREDIENTE*\n\n"
-            "Scrivi l'ingrediente che cerchi:\n"
-            "(es: pollo, pesce, riso, carote...)",
-            parse_mode="Markdown"
+            "Scrivi semplicemente l'ingrediente che cerchi:\n"
+            "(es: pollo, pesce, riso, carote...)\n\n"
+            "Il bot cercherà automaticamente nel menu!"
         )
-        context.user_data['in_ricerca'] = True
     
     # Torna alle settimane
     elif data.startswith("back_settimane_"):
