@@ -42,23 +42,31 @@ EMOJI_PASTI = {
 # ============================================================
 
 def estrai_e_categorizza_ingredienti():
-    """Carica gli ingredienti dal file pulito"""
+    """Carica gli ingredienti dal file categorizzato"""
     try:
-        with open('ingredienti_definitivi.json', 'r', encoding='utf-8') as f:
+        with open('ingredienti_categorizzati.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
-            print(f"✅ Ingredienti caricati: {len(data)} categorie")
-            logger.info(f"✅ Ingredienti caricati: {len(data)} categorie")
-            return data
+            # Converti in formato con emoji
+            ingredienti_con_emoji = {}
+            emoji_map = {
+                'verdure': '🥬 VERDURE',
+                'frutta': '🍎 FRUTTA',
+                'proteine': '🍗 PROTEINE',
+                'carboidrati': '🥕 CARBOIDRATI',
+                'latticini': '🧀 LATTICINI',
+                'condimenti': '🧂 CONDIMENTI'
+            }
+            for categoria, lista in data.items():
+                emoji_categoria = emoji_map.get(categoria, f'📌 {categoria.upper()}')
+                ingredienti_con_emoji[emoji_categoria] = [ing.capitalize() for ing in lista]
+            
+            print(f"✅ Ingredienti caricati: {len(ingredienti_con_emoji)} categorie")
+            logger.info(f"✅ Ingredienti caricati da ingredienti_categorizzati.json")
+            return ingredienti_con_emoji
     except FileNotFoundError:
-        print("❌ File ingredienti_definitivi.json NON trovato!")
-        logger.error("❌ File ingredienti_definitivi.json NON trovato!")
-        # Fallback: lista di base se il file non esiste
-        return {
-            '🥬 VERDURE': ['Carote', 'Spinaci', 'Broccoli', 'Zucchine', 'Pomodori'],
-            '🍗 PROTEINE': ['Pollo', 'Pesce', 'Uova', 'Carne', 'Tacchino'],
-            '🥕 CARBOIDRATI': ['Riso', 'Pasta', 'Pane', 'Patate', 'Farro'],
-            '🧀 LATTICINI': ['Yogurt', 'Ricotta', 'Formaggio', 'Mozzarella', 'Latte']
-        }
+        print("❌ File ingredienti_categorizzati.json NON trovato!")
+        logger.error("❌ File ingredienti_categorizzati.json NON trovato!")
+        return {}
 
 INGREDIENTI_CATEGORIZZATI = estrai_e_categorizza_ingredienti()
 
