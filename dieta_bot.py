@@ -9,6 +9,7 @@ import json
 import logging
 import random
 import os
+from pathlib import Path
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters
 
@@ -16,14 +17,26 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ============================================================
+# OTTIENI IL PERCORSO DELLO SCRIPT
+# ============================================================
+SCRIPT_DIR = Path(__file__).parent
+MENU_FILE = SCRIPT_DIR / 'menu_settimanale.json'
+INGREDIENTI_FILE = SCRIPT_DIR / 'ingredienti_definitivi.json'
+FRASI_FILE = SCRIPT_DIR / 'frasimotivazionali.txt'
+
+print(f"📂 Script directory: {SCRIPT_DIR}")
+print(f"📄 Menu file: {MENU_FILE} (esiste: {MENU_FILE.exists()})")
+print(f"🥗 Ingredienti file: {INGREDIENTI_FILE} (esiste: {INGREDIENTI_FILE.exists()})")
+
+# ============================================================
 # CARICA IL MENU E LE FRASI MOTIVAZIONALI
 # ============================================================
 
-with open('menu_settimanale.json', 'r', encoding='utf-8') as f:
+with open(MENU_FILE, 'r', encoding='utf-8') as f:
     MENU = json.load(f)
 
 # Carica le frasi motivazionali
-with open('frasimotivazionali.txt', 'r', encoding='utf-8') as f:
+with open(FRASI_FILE, 'r', encoding='utf-8') as f:
     frasi_raw = f.readlines()
     FRASI_MOTIVAZIONALI = [frase.strip() for frase in frasi_raw if frase.strip()]
 
@@ -44,10 +57,20 @@ EMOJI_PASTI = {
 def estrai_e_categorizza_ingredienti():
     """Carica gli ingredienti dal file pulito"""
     try:
-        with open('ingredienti_definitivi.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
+        with open(INGREDIENTI_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            print(f"✅ Ingredienti caricati da {INGREDIENTI_FILE}")
+            return data
     except FileNotFoundError:
-        # Fallback: lista di base se il file non esiste
+        print(f"❌ File {INGREDIENTI_FILE} non trovato! Usando fallback.")
+        return {
+            '🥬 VERDURE': ['Carote', 'Spinaci', 'Broccoli', 'Zucchine', 'Pomodori'],
+            '🍗 PROTEINE': ['Pollo', 'Pesce', 'Uova', 'Carne', 'Tacchino'],
+            '🥕 CARBOIDRATI': ['Riso', 'Pasta', 'Pane', 'Patate', 'Farro'],
+            '🧀 LATTICINI': ['Yogurt', 'Ricotta', 'Formaggio', 'Mozzarella', 'Latte']
+        }
+    except json.JSONDecodeError as e:
+        print(f"❌ Errore JSON in {INGREDIENTI_FILE}: {e}")
         return {
             '🥬 VERDURE': ['Carote', 'Spinaci', 'Broccoli', 'Zucchine', 'Pomodori'],
             '🍗 PROTEINE': ['Pollo', 'Pesce', 'Uova', 'Carne', 'Tacchino'],
@@ -74,6 +97,7 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
         [InlineKeyboardButton("☀️ ESTATE", callback_data="stagione_ESTATE")],
         [InlineKeyboardButton("🌱 PRIMAVERA", callback_data="stagione_PRIMAVERA")],
         [InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")],
+        [InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start")],
         [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
         [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
     ]
@@ -131,35 +155,67 @@ async def cerca_ingrediente(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Non ho trovato '{ingrediente}' nel menu!")
         return
     
-    # Formato risposta con bottoni
-    text = f"🔍 *RISULTATI PER: {ingrediente.upper()}*\n\n"
-    keyboard = []
+    # Salva i risultati per uso futuro
+    context.user_data['ingrediente_cercato'] = ingrediente
+    context.user_data['risultati_ingrediente'] = risultati
     
-    for stagione_key, stagioni_data in sorted(risultati.items()):
-        text += f"📅 *{stagione_key}*\n"
-        
-        for settimana_key, settimana_data in sorted(stagioni_data.items()):
-            settimana_num = settimana_key.split("_")[1]
-            text += f"  📌 Settimana {settimana_num}\n"
-            
-            for giorno in GIORNI:
-                if giorno in settimana_data:
-                    text += f"    • {giorno}\n"
-                    for item in settimana_data[giorno]:
-                        emoji = EMOJI_PASTI.get(item["pasto"], "🍴")
-                        pasto_nome = item["pasto"].replace("_", " ").capitalize()
-                        text += f"      {emoji} {pasto_nome}\n"
-                    
-                    # Aggiungi bottone per questo giorno
-                    giorno_idx = GIORNI.index(giorno)
-                    button_text = f"📆 {stagione_key} S{settimana_num} {giorno}"
-                    keyboard.append([InlineKeyboardButton(button_text, callback_data=f"giorno_{stagione_key}_{settimana_num}_{giorno_idx}")])
-        
-        text += "\n"
+    # Formato risposta con testo riepilogativo
+    text = f"🔍 *RISULTATI PER: {ingrediente.upper()}*\n\n"
+    
+    # Crea riepilogo per stagione
+    for stagione_key in sorted(risultati.keys()):
+        stagione_data = risultati[stagione_key]
+        num_settimane = len(stagione_data)
+        giorni_totali = sum(len(giorni) for settimana in stagione_data.values() for giorni in [settimana])
+        text += f"📅 *{stagione_key}*: {num_settimane} settimane\n"
+    
+    text += "\n_Clicca su una stagione per vedere i dettagli_"
+    
+    # Bottoni per le stagioni
+    keyboard = []
+    for stagione_key in sorted(risultati.keys()):
+        keyboard.append([InlineKeyboardButton(f"📅 {stagione_key}", callback_data=f"ingrediente_stagione_{stagione_key}")])
     
     keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def mostra_ingrediente_per_stagione(query, context, stagione):
+    """Mostra i giorni di una stagione che contengono l'ingrediente cercato"""
+    ingrediente = context.user_data.get('ingrediente_cercato')
+    risultati = context.user_data.get('risultati_ingrediente', {})
+    
+    if stagione not in risultati:
+        await query.edit_message_text("❌ Stagione non trovata!")
+        return
+    
+    stagione_data = risultati[stagione]
+    text = f"🔍 *{ingrediente.upper()}* in *{stagione}*\n\n"
+    keyboard = []
+    
+    for settimana_key in sorted(stagione_data.keys()):
+        settimana_num = settimana_key.split("_")[1]
+        text += f"📌 *Settimana {settimana_num}*\n"
+        
+        for giorno in GIORNI:
+            if giorno in stagione_data[settimana_key]:
+                text += f"  • *{giorno}*\n"
+                for item in stagione_data[settimana_key][giorno]:
+                    emoji = EMOJI_PASTI.get(item["pasto"], "🍴")
+                    pasto_nome = item["pasto"].replace("_", " ").capitalize()
+                    text += f"    {emoji} {pasto_nome}\n"
+                
+                # Bottone per il giorno (con callback per ricerca ingrediente)
+                giorno_idx = GIORNI.index(giorno)
+                button_text = f"📆 S{settimana_num} {giorno}"
+                keyboard.append([InlineKeyboardButton(button_text, callback_data=f"ingrediente_giorno_{stagione}_{settimana_num}_{giorno_idx}")])
+        
+        text += "\n"
+    
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="ingrediente_indietro")])
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Gestisce i bottoni inline"""
@@ -191,6 +247,49 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Torna a inizio
     elif data == "home":
         await mostra_menu_principale(query)
+    
+    # Ricerca ingrediente
+    elif data == "ricerca_ingrediente_start":
+        await query.edit_message_text("🔍 Scrivi l'ingrediente che cerchi (es. salmone, riso, pollo...)")
+    
+    # Visualizza ingrediente per stagione
+    elif data.startswith("ingrediente_stagione_"):
+        stagione = data.replace("ingrediente_stagione_", "")
+        await mostra_ingrediente_per_stagione(query, context, stagione)
+    
+    # Torna al riepilogo ingrediente
+    elif data == "ingrediente_indietro":
+        ingrediente = context.user_data.get('ingrediente_cercato')
+        risultati = context.user_data.get('risultati_ingrediente', {})
+        
+        text = f"🔍 *RISULTATI PER: {ingrediente.upper()}*\n\n"
+        for stagione_key in sorted(risultati.keys()):
+            stagione_data = risultati[stagione_key]
+            num_settimane = len(stagione_data)
+            text += f"📅 *{stagione_key}*: {num_settimane} settimane\n"
+        
+        text += "\n_Clicca su una stagione per vedere i dettagli_"
+        
+        keyboard = []
+        for stagione_key in sorted(risultati.keys()):
+            keyboard.append([InlineKeyboardButton(f"📅 {stagione_key}", callback_data=f"ingrediente_stagione_{stagione_key}")])
+        
+        keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+    
+    # Torna alla stagione della ricerca
+    elif data.startswith("ingrediente_indietro_stagione_"):
+        stagione = data.replace("ingrediente_indietro_stagione_", "")
+        await mostra_ingrediente_per_stagione(query, context, stagione)
+    
+    # Visualizza giorno da ricerca ingrediente
+    elif data.startswith("ingrediente_giorno_"):
+        parts = data.split("_")
+        stagione = parts[2]
+        settimana = parts[3]
+        giorno_idx = int(parts[4])
+        await mostra_menu_giorno_da_ricerca(query, context, stagione, f"SETTIMANA_{settimana}", giorno_idx)
     
     # Torna alle settimane
     elif data.startswith("back_settimane_"):
@@ -235,6 +334,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             nome_settimana = parts[0]
             giorno_idx = parts[1]
             await visualizza_giorno_settimana_salvata(query, update.effective_user.id, nome_settimana, giorno_idx)
+    
+    # Aggiungi giorno a settimana - seleziona settimana
+    elif data.startswith("add_to_settimana_"):
+        parts = data.replace("add_to_settimana_", "").split("_")
+        stagione = parts[0]
+        settimana_num = parts[1]
+        giorno_idx = int(parts[2])
+        await aggiungi_giorno_a_settimana_start(query, update.effective_user.id, stagione, settimana_num, giorno_idx)
     
     # Selezione categoria per creare settimana
     elif data.startswith("seleziona_cat_"):
@@ -283,6 +390,27 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "(Scrivi il nome e invialo come messaggio)",
             parse_mode="Markdown"
         )
+    
+    # Seleziona settimana di destinazione per aggiungere giorno
+    elif data.startswith("select_dest_week_"):
+        parts = data.replace("select_dest_week_", "").split("#")
+        nome_settimana = parts[0]
+        giorno_parts = parts[1].split("_")
+        stagione = giorno_parts[0]
+        settimana_num = giorno_parts[1]
+        giorno_idx = int(giorno_parts[2])
+        await select_dest_week(query, context, nome_settimana, stagione, settimana_num, giorno_idx)
+    
+    # Aggiungi giorno allo slot scelto
+    elif data.startswith("add_day_slot_"):
+        parts = data.replace("add_day_slot_", "").split("#")
+        nome_settimana = parts[0]
+        giorno_parts = parts[1].split("_")
+        stagione = giorno_parts[0]
+        settimana_num = giorno_parts[1]
+        giorno_idx = int(giorno_parts[2])
+        slot_idx = int(parts[2])
+        await add_day_to_week_slot(query, context, nome_settimana, stagione, settimana_num, giorno_idx, slot_idx)
 
 async def mostra_menu_principale(query):
     """Mostra il menu principale"""
@@ -295,7 +423,9 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
 """
     keyboard = [
         [InlineKeyboardButton("☀️ ESTATE", callback_data="stagione_ESTATE")],
+        [InlineKeyboardButton("🌱 PRIMAVERA", callback_data="stagione_PRIMAVERA")],
         [InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")],
+        [InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start")],
         [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
         [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
     ]
@@ -336,12 +466,12 @@ async def mostra_giorni_settimana(query, stagione, settimana):
 async def mostra_menu_giorno(query, stagione, settimana, giorno_idx):
     """Mostra il menu di un giorno specifico"""
     giorno = GIORNI[giorno_idx]
-    menu_giorno = MENU[stagione][settimana][giorno.lower()]
+    menu_giorno = MENU[stagione][settimana][giorno]
     
     text = f"*{stagione} - {settimana.replace('_', ' ')} - {giorno}*\n\n"
     
     # Ordine corretto dei pasti
-    ordine_pasti = ["colazione", "spuntino_1", "pranzo", "spuntino_2", "cena", "dopo_cena"]
+    ordine_pasti = ["colazione", "spuntino", "pranzo", "spuntino_2", "cena", "dopo_cena"]
     
     for pasto in ordine_pasti:
         if pasto in menu_giorno:
@@ -352,6 +482,7 @@ async def mostra_menu_giorno(query, stagione, settimana, giorno_idx):
     
     settimana_num = settimana.split("_")[1]
     keyboard = [
+        [InlineKeyboardButton("➕ Aggiungi a settimana", callback_data=f"add_to_settimana_{stagione}_{settimana_num}_{giorno_idx}")],
         [InlineKeyboardButton("⬅️ Giorno Precedente" if giorno_idx > 0 else "⬅️", 
                              callback_data=f"giorno_{stagione}_{settimana_num}_{giorno_idx - 1}" if giorno_idx > 0 else "skip"),
          InlineKeyboardButton("Giorno Successivo ➡️" if giorno_idx < len(GIORNI) - 1 else "➡️",
@@ -363,9 +494,33 @@ async def mostra_menu_giorno(query, stagione, settimana, giorno_idx):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
-# ============================================================
-# CREA SETTIMANA PERSONALIZZATA
-# ============================================================
+async def mostra_menu_giorno_da_ricerca(query, context, stagione, settimana, giorno_idx):
+    """Mostra il menu di un giorno specifico da ricerca ingrediente (con torna alla ricerca)"""
+    giorno = GIORNI[giorno_idx]
+    menu_giorno = MENU[stagione][settimana][giorno]
+    
+    text = f"*{stagione} - {settimana.replace('_', ' ')} - {giorno}*\n\n"
+    
+    # Ordine corretto dei pasti
+    ordine_pasti = ["colazione", "spuntino", "pranzo", "spuntino_2", "cena", "dopo_cena"]
+    
+    for pasto in ordine_pasti:
+        if pasto in menu_giorno:
+            emoji = EMOJI_PASTI.get(pasto, "🍴")
+            piatto = menu_giorno.get(pasto, "N/A")
+            pasto_nome = pasto.upper().replace("_", " ")
+            text += f"{emoji} *{pasto_nome}*\n{piatto}\n\n"
+    
+    settimana_num = settimana.split("_")[1]
+    keyboard = [
+        [InlineKeyboardButton("➕ Aggiungi a settimana", callback_data=f"add_to_settimana_{stagione}_{settimana_num}_{giorno_idx}")],
+        [InlineKeyboardButton("⬅️ Torna alla ricerca", callback_data=f"ingrediente_indietro_stagione_{stagione}")],
+        [InlineKeyboardButton("🏠 HOME", callback_data="home")],
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
 
 async def mostra_categorie_crea_settimana(query, user_id):
     """Mostra le categorie per creare una settimana personalizzata"""
@@ -907,9 +1062,136 @@ async def visualizza_giorno_settimana_salvata(query, user_id, nome_settimana, gi
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="HTML")
 
 async def salva_settimana_con_nome_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Wrapper per gestire il salvataggio della settimana"""
+    """Wrapper per gestire il salvataggio o ricerca ingrediente"""
     if context.user_data.get('in_salvataggio'):
         await salva_settimana_con_nome(update, context)
+    else:
+        await cerca_ingrediente(update, context)
+
+# ============================================================
+# AGGIUNGI GIORNO A SETTIMANA
+# ============================================================
+
+async def aggiungi_giorno_a_settimana_start(query, user_id, stagione, settimana_num, giorno_idx):
+    """Mostra la lista delle settimane salvate per aggiungere il giorno"""
+    # Carica le settimane salvate dell'utente
+    try:
+        with open(SCRIPT_DIR / 'settimane_utenti.json', 'r', encoding='utf-8') as f:
+            settimane_utenti = json.load(f)
+    except FileNotFoundError:
+        await query.answer("❌ Nessuna settimana salvata ancora!", show_alert=True)
+        return
+    
+    user_settimane = settimane_utenti.get(str(user_id), {})
+    if not user_settimane:
+        await query.answer("❌ Nessuna settimana salvata ancora!", show_alert=True)
+        return
+    
+    # Salva il giorno selezionato in context
+    giorno = GIORNI[giorno_idx]
+    settimana = f"SETTIMANA_{settimana_num}"
+    menu_giorno = MENU[stagione][settimana][giorno]
+    
+    # Crea la struttura del giorno per il salvataggio
+    giorno_data = {
+        "stagione": stagione,
+        "settimana": settimana,
+        "giorno": giorno,
+        "menu": menu_giorno
+    }
+    
+    text = f"*Aggiungi a quale settimana?*\n\nGiorno selezionato: {stagione} - {giorno}\n\n"
+    keyboard = []
+    
+    for nome_settimana in sorted(user_settimane.keys()):
+        keyboard.append([InlineKeyboardButton(nome_settimana, 
+                                             callback_data=f"select_dest_week_{nome_settimana}#{stagione}_{settimana_num}_{giorno_idx}")])
+    
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data=f"back_settimane_{stagione}")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def select_dest_week(query, context, nome_settimana, stagione, settimana_num, giorno_idx):
+    """Mostra lo stato della settimana di destinazione con gli slot vuoti"""
+    user_id = query.from_user.id
+    
+    # Carica le settimane salvate
+    try:
+        with open(SCRIPT_DIR / 'settimane_utenti.json', 'r', encoding='utf-8') as f:
+            settimane_utenti = json.load(f)
+    except FileNotFoundError:
+        await query.answer("❌ Errore nel caricamento!", show_alert=True)
+        return
+    
+    user_settimane = settimane_utenti.get(str(user_id), {})
+    settimana_dest = user_settimane.get(nome_settimana, {})
+    
+    # Mostra lo stato della settimana con slot vuoti e pieni
+    text = f"*Settimana: {nome_settimana}*\n\n"
+    text += f"*Aggiungi il giorno:* {GIORNI[giorno_idx]}\n\n"
+    
+    for i, giorno in enumerate(GIORNI):
+        if giorno in settimana_dest:
+            emoji = "✅"
+            text += f"{emoji} *{giorno}*: {list(settimana_dest[giorno].values())[0] if isinstance(settimana_dest[giorno], dict) else settimana_dest[giorno]}\n"
+        else:
+            emoji = "⬜"
+            text += f"{emoji} *{giorno}*: vuoto\n"
+    
+    keyboard = []
+    # Mostra i pulsanti solo per gli slot vuoti
+    row = []
+    for i, giorno in enumerate(GIORNI):
+        if giorno not in settimana_dest:
+            row.append(InlineKeyboardButton(f"➕ {giorno}", 
+                                           callback_data=f"add_day_slot_{nome_settimana}#{stagione}_{settimana_num}_{giorno_idx}#{i}"))
+            if len(row) == 2:
+                keyboard.append(row)
+                row = []
+    if row:
+        keyboard.append(row)
+    
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def add_day_to_week_slot(query, context, nome_settimana, stagione, settimana_num, giorno_idx, slot_idx):
+    """Aggiunge il giorno allo slot scelto della settimana"""
+    user_id = query.from_user.id
+    
+    try:
+        with open(SCRIPT_DIR / 'settimane_utenti.json', 'r', encoding='utf-8') as f:
+            settimane_utenti = json.load(f)
+    except FileNotFoundError:
+        settimane_utenti = {}
+    
+    user_settimane = settimane_utenti.get(str(user_id), {})
+    
+    # Ottieni il giorno da aggiungere
+    giorno_source = GIORNI[giorno_idx]
+    settimana_source = f"SETTIMANA_{settimana_num}"
+    menu_giorno = MENU[stagione][settimana_source][giorno_source]
+    
+    # Ottieni il giorno slot dove aggiungere
+    giorno_dest = GIORNI[slot_idx]
+    
+    # Aggiungi il giorno alla settimana di destinazione
+    if nome_settimana not in user_settimane:
+        user_settimane[nome_settimana] = {}
+    
+    user_settimane[nome_settimana][giorno_dest] = menu_giorno
+    settimane_utenti[str(user_id)] = user_settimane
+    
+    # Salva
+    with open(SCRIPT_DIR / 'settimane_utenti.json', 'w', encoding='utf-8') as f:
+        json.dump(settimane_utenti, f, ensure_ascii=False, indent=2)
+    
+    await query.answer(f"✅ {giorno_source} aggiunto a {nome_settimana} come {giorno_dest}!", show_alert=True)
+    
+    # Mostra di nuovo la settimana
+    await select_dest_week(query, context, nome_settimana, stagione, settimana_num, giorno_idx)
 
 # ============================================================
 # MAIN
@@ -929,7 +1211,6 @@ def main():
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, salva_settimana_con_nome_wrapper))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, cerca_ingrediente))
     
     print("🚀 Bot avviato! Premi Ctrl+C per fermare.")
     app.run_polling()
