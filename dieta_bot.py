@@ -13,7 +13,7 @@ import psycopg2
 import psycopg2.extras
 import aiohttp
 from pathlib import Path
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters
 from bring_api import Bring, BringAuthException, BringRequestException
 from cryptography.fernet import Fernet
@@ -1134,6 +1134,15 @@ Scegli una categoria per selezionare gli ingredienti:
 """
     
     keyboard = []
+    
+    # Bottone mini app (nuovo!)
+    keyboard.append([InlineKeyboardButton(
+        "🎨 Seleziona su Web (NUOVO!)", 
+        web_app=WebAppInfo(url="https://dieta-bot.up.railway.app/web_app")
+    )])
+    
+    keyboard.append([InlineKeyboardButton("🔽 Oppure scegli da categoria:", callback_data="dummy")])
+    
     for categoria in INGREDIENTI_CATEGORIZZATI.keys():
         keyboard.append([InlineKeyboardButton(categoria, callback_data=f"seleziona_cat_{categoria}")])
     

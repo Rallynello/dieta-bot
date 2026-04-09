@@ -1,0 +1,151 @@
+═══════════════════════════════════════════════════════════════════════════════
+🥗 GUIDA COMPLETA - COME USARE IL BOT SU TELEGRAM 
+═══════════════════════════════════════════════════════════════════════════════
+
+PASSO 1: CREARE IL BOT SU TELEGRAM
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Apri Telegram (su telefono o PC)
+
+2. Cerca "@BotFather" nella barra di ricerca
+   - Clicca sul primo risultato (verificato con spunta blu)
+
+3. Premi il bottone "AVVIA" oppure scrivi: /start
+
+4. Vedrai una lista di comandi. Scrivi: /newbot
+
+5. Ti chiederà il nome del bot. Scrivi qualcosa come:
+   "Mio Bot Dieta" oppure "Dietan Bot"
+   (Questo è il nome che vedrai nella chat)
+
+6. Ti chiederà lo username del bot. Deve finire con "_bot"
+   Esempio: mio_bot_dieta oppure dieta_personale_bot
+   (Questo è @username che altri useranno per trovarti)
+
+7. BotFather ti darà il TOKEN. Assomiglia a:
+   ⚠️ 123456789:ABCDEFghijklmnopqrstuvwxyz_1234567890AB
+
+   👉 COPIA QUESTO TOKEN E SALVALO TEMPORANEAMENTE!
+
+═══════════════════════════════════════════════════════════════════════════════
+PASSO 2: CONFIGURARE IL FILE dieta_bot.py
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Apri il file: dieta_bot.py (con Notepad o Visual Studio Code)
+
+2. Cerca questa riga (verso la fine, intorno a riga 150):
+   
+   TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+
+3. Sostituiscila con il TUO token. Ad esempio:
+
+   PRIMA:  TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+   DOPO:   TOKEN = "123456789:ABCDEFghijklmnopqrstuvwxyz_1234567890AB"
+
+4. Salva il file (Ctrl+S)
+
+═══════════════════════════════════════════════════════════════════════════════
+PASSO 3: AVVIARE IL BOT
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Apri PowerShell o Command Prompt
+
+2. Naviga nella cartella del bot:
+   cd "D:\users\SD74487\Documents\Borrelli Andrea Personale\Documenti personali\Dieta"
+
+3. Avvia il bot:
+   python dieta_bot.py
+
+4. Se vedi questo messaggio, il bot è acceso! ✅
+   🚀 Bot avviato! Premi Ctrl+C per fermare.
+
+❌ Se vedi errori, controlla:
+   - Il token è corretto e copiato bene?
+   - Il file menu_settimanale.json esiste nella stessa cartella?
+   - Python è installato?
+
+═══════════════════════════════════════════════════════════════════════════════
+PASSO 4: USARE IL BOT SU TELEGRAM
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Torna a Telegram e cerca il tuo bot per username
+   Esempio: @mio_bot_dieta
+
+2. Clicca sul bot e premi "AVVIA" oppure scrivi: /start
+
+3. Vedrai il menu principale con i bottoni per le 4 settimane
+
+4. Clicca su una settimana, poi scegli un giorno
+
+5. Vedrai il menu completo con:
+   🌅 COLAZIONE
+   🍽️ PRANZO
+   🌙 CENA
+   🥜 SPUNTINI
+
+6. Usa i bottoni ⬅️ ➡️ per passare da un giorno all'altro
+
+7. Clicca "🔙 Indietro" per tornare alla lista giorni
+
+═══════════════════════════════════════════════════════════════════════════════
+COMANDI DISPONIBILI
+═══════════════════════════════════════════════════════════════════════════════
+
+Nella chat del bot puoi usare questi comandi:
+
+/start   - Torna al menu principale
+/help    - Mostra la lista di comandi
+/quanto  - (Esempio di comando che puoi aggiungere)
+
+═══════════════════════════════════════════════════════════════════════════════
+DOMANDE FREQUENTI
+═══════════════════════════════════════════════════════════════════════════════
+
+❓ Il bot rimane acceso 24/7?
+→ NO! Il bot rimane acceso SOLO mentre stai eseguendo "python dieta_bot.py"
+  Se chiudi il terminale, il bot si spegne.
+  
+  Per tenerlo sempre acceso, servisce un SERVER (Heroku, Replit, VPS, ecc.)
+
+❓ Come tolgo il token dal file per sicurezza?
+→ Dopo aver testato, puoi usare VARIABILI D'AMBIENTE:
+  - Crea un file .env con TOKEN=tuo_token
+  - Modifica il codice per leggerlo da lì
+  
+❓ Come modifico il menu?
+→ Edita il file estrai_menu_da_pdf.py
+  Modifica il dizionario MENU_SETTIMANALE
+  Esegui: python estrai_menu_da_pdf.py
+  Il file menu_settimanale.json si aggiornerà automaticamente
+  
+❓ Il bot non risponde
+→ Controlla:
+  1. Il terminale di PowerShell è ancora aperto? (Se lo chiudi, il bot si spegne)
+  2. Il token è corretto?
+  3. Hai internet?
+
+═══════════════════════════════════════════════════════════════════════════════
+SOLUZIONE RAPIDA SE NON FUNZIONA
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Chiudi tutto (Telegram, PowerShell, ecc.)
+
+2. Riapri PowerShell e digita:
+   python --version
+   
+   Deve mostrare Python 3.7+. Se non esce nulla, Python non è nel PATH.
+
+3. Riapri il file dieta_bot.py e verifica:
+   - Il token è lungo e senza spazi?
+   - Non hai modificato nient'altro nel file?
+
+4. Prova di nuovo:
+   python dieta_bot.py
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Se arriva qui, hai finito! Goditi il tuo bot dieta! 🥗🤖
+
+Domande? Leggi il README_BOT.md per più dettagli!
+
+═══════════════════════════════════════════════════════════════════════════════

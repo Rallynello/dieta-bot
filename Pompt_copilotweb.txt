@@ -1,0 +1,65 @@
+Voglio che tu estragga i pasti da un PDF con tabelle settimanali in un formato molto preciso.
+Devi seguire esattamente queste regole:
+
+1️⃣ LETTURA DEL PDF
+- Non leggere il PDF riga per riga.
+- Devi leggerlo **colonna per colonna**, perché le righe nel PDF possono essere fuorvianti o spezzate.
+- Ogni colonna rappresenta un giorno della settimana (Lunedì → Domenica).
+- Ogni riga rappresenta un tipo di pasto (colazione, spuntino, pranzo, spuntino_2, cena, dopo_cena).
+
+2️⃣ COLAZIONE
+- Le colazioni NON vanno lette dalla colonna: nei PDF spesso sono nella **testata della settimana**.
+- Quindi: **prendi la colazione dalla testata della settimana (in alto), non dalla colonna del giorno**.
+
+3️⃣ SPUNTINO (mattina)
+- Ignora i trattini “–” nelle colonne.
+- Usa **sempre lo spuntino del LUNEDÌ come spuntino STANDARD per tutti i giorni della settimana**:
+  → 2 fette Galbusera oppure crackers legumi/proteinG/integrali o 30 g chips Probios  
+  → Se sveglio tardi: frutta secca + 2 gallette/wasa
+(Ovviamente usa il testo esatto del PDF che sto caricando.)
+
+4️⃣ SPUNTINO_2 (pomeriggio)
+- Questo è lo spuntino che si trova nella riga “Spuntino” sotto il PRANZO.
+- È diverso ogni giorno: **devi prendere quello esatto nella colonna del giorno**.
+
+5️⃣ CENA, PRANZO E DOPO CENA
+- Devi prendere esattamente il testo dentro la colonna del giorno, senza aggiungere o interpretare.
+
+6️⃣ ZERO INVENZIONI
+- Non devi inventare nulla.
+- Non devi indovinare.
+- Devi prendere solo ciò che è scritto nel PDF.
+- Mantieni quantità, ingredienti e testo esattamente come sono.
+
+7️⃣ OUTPUT RICHIESTO
+Genera un JSON strutturato così:
+
+{
+  "SETTIMANA_X": {
+    "LUNEDI": {
+      "colazione": "",
+      "spuntino": "",
+      "pranzo": "",
+      "spuntino_2": "",
+      "cena": "",
+      "dopo_cena": ""
+    },
+    "MARTEDI": { ... },
+    ...
+    "DOMENICA": { ... }
+  }
+}
+
+8️⃣ MAPPATURA SETTIMANE
+- Se il PDF contiene Settimane 1–4, trasformale in:
+  SETTIMANA_1, SETTIMANA_2, SETTIMANA_3, SETTIMANA_4
+- Se è Inverno2 (che contiene Settimane 1–4), devono diventare:
+  SETTIMANA_5, SETTIMANA_6, SETTIMANA_7, SETTIMANA_8
+- Se è Estate (Settimane 1–4) mantieni:
+  SETTIMANA_1_ESTATE, SETTIMANA_2_ESTATE, ecc.
+
+9️⃣ PRIMA DI GENERARE IL JSON
+- Devi sempre farmi vedere un TEST (un giorno specifico) per confermare che stai leggendo bene.
+Solo dopo potrai generare la settimana intera.
+
+Ora ti carico il PDF → leggi e chiedimi un giorno da testare.

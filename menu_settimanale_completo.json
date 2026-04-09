@@ -1,0 +1,648 @@
+{
+  "ESTATE": {
+    "1": {
+      "lunedi": {
+        "colazione": "50 g pane di segale tostato + 1 quadrato cioccolato\n1 yogurt di soia + 1 kiwi",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Farro con ceci e pomodorini + 2 zucchiai pesto",
+        "spuntino_pomeridiano": "1 paccetto crackers di legumi",
+        "cena": "Asparagi + 2 uova con scaglie grana e nocciole tostate + wasa fibre",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "martedi": {
+        "colazione": "50 g pane segale tostato + 2 fette bresaola + velo philadelphia",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Riso nero con fagiolini e piselli + frittatina",
+        "spuntino_pomeridiano": "1 barretta low sugar equilibra",
+        "cena": "Merluzzo con pomodorini e olive + wasa fibre + spinaci",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "mercoledi": {
+        "colazione": "1 toast con pane integrale e prosciutto",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "2 patate in insalata con fagiolini e pesto + tonno",
+        "spuntino_pomeridiano": "Ricotta cacao + stevia + mandorle",
+        "cena": "Insalata di pollo e finocchio ½ arancia e mandorle + wasa fibre",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "giovedi": {
+        "colazione": "Porridge con mirtilli e cacao",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Riso nero con salmone affumicato + zucchine e rucola",
+        "spuntino_pomeridiano": "3 wasa + 10 mandorle",
+        "cena": "Insalata di farro ceci ½ avocado",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "venerdi": {
+        "colazione": "1 yogurt di soia + muesli + semi di lino/chia",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Pasta integrale al dente con zucchine e feta",
+        "spuntino_pomeridiano": "1 quadrato cioccolato fondente + 10 mandorle",
+        "cena": "Riso basmati + trancio di salmone gratinata + zucchine grigliate",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "sabato": {
+        "colazione": "Porridge con ½ banana cannella e 1 quadrato cacao",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Calamari e piselli integrale con crostini di pane integrale",
+        "spuntino_pomeridiano": "3 gallette + crema di nocciole tostate",
+        "cena": "PASTA LIBERO (con moderazione)",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "domenica": {
+        "colazione": "Pancake con farina di avena e albume + 1 quadrato cioccolato fondente fuso",
+        "spuntino": "-",
+        "pranzo": "Riso basmati integrale con gamberi e zucchine",
+        "spuntino_pomeridiano": "1 yogurt + 1 frutto + 1 quadrato cioccolato",
+        "cena": "Farinata di ceci al forno + asparagi + wasa",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      }
+    },
+    "2": {
+      "lunedi": {
+        "colazione": "1 yogurt intero greco + cereali all bran prebiotic + 2 zucchiaini semi di lino tritati",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Riso piselli asparagi e lievito alimentare",
+        "spuntino_pomeridiano": "1 ricotta + cacao + truvia + 5 mandorle",
+        "cena": "Pane integrale tostato 2 uova occhio di bue + fagiolini e pomodori",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "martedi": {
+        "colazione": "1 toast con pane integrale e prosciutto",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Bowl di quinoa ½ avocado melanzane grigliate pomodorini secchi e ceci tostati",
+        "spuntino_pomeridiano": "1 paccetto crackers di legumi",
+        "cena": "Trancio di pesce spada + patate in insalata + spinaci con lievito",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "mercoledi": {
+        "colazione": "1 yogurt intero greco + cereali all bran prebiotic + 2 zucchiaini semi di lino tritati",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Piadina di farina di ceci con velo philadelphia / 2 fette salmone affumicato",
+        "spuntino_pomeridiano": "1 barretta low sugar equilibra",
+        "cena": "Insalata di finocchi e mandorle in scaglie + salmone affumicato + 5 wasa",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "giovedi": {
+        "colazione": "Porridge overnight con fragole velo di yogurt e gocce di cioccolato",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Riso basmati con tonno e piselli",
+        "spuntino_pomeridiano": "Yogurt + fragole",
+        "cena": "Insalata di pollo sedano noci salsa yogurt + pane integrale",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "venerdi": {
+        "colazione": "1 yogurt di soia + cereal all bran prebiotic + semi di lino tritati",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Farro con lenticchie e pomodorini",
+        "spuntino_pomeridiano": "1 quadrato cioccolato fondente + 3 noci",
+        "cena": "Wasa fibre + 150 g sogliola/platessa gratinata+ melanzane al pomodoro",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "sabato": {
+        "colazione": "Pane tostato 50 g + 1 uovo strappazzate + ¼ avocado",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G",
+        "pranzo": "Cous cous carote piselli sgombro + fagiolini",
+        "spuntino_pomeridiano": "1 yogurt + 1 quadrato cioccolato",
+        "cena": "PASTA LIBERO (con moderazione)",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "domenica": {
+        "colazione": "Pancake con farina di avena e albume + 1 quadrato cioccolato fondente",
+        "spuntino": "-",
+        "pranzo": "Gnocchi o spatzles con crema di zucchine ricotta",
+        "spuntino_pomeridiano": "1 gelato 2 gusti",
+        "cena": "Insalata greca con feta cipolla cetrioli pomodori + wasa",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      }
+    },
+    "3": {
+      "lunedi": {
+        "colazione": "Porridge caldo con gocce di cioccolato",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Insalata mista con noci e fiocchi di latte SL + pane integrale",
+        "spuntino_pomeridiano": "1 barretta equilibra",
+        "cena": "Insalata di 2 fettine pollo con pomodori ½ avocado noci + crostini di pane integrale",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "martedi": {
+        "colazione": "3 wasa + velo yogurt + crema di nocciole tostate",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Riso nero con feta + zucchine e menta",
+        "spuntino_pomeridiano": "3 gallette + mix pistacchi/mandorle",
+        "cena": "Polpo + patate + insalata di finocchi",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "mercoledi": {
+        "colazione": "Pane integrale + 1 quadrato cioccolato fondente fuso + 1 yogurt intero",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Cous cous lenticchie melanzane pomodorini",
+        "spuntino_pomeridiano": "1 yogurt + cacao + stevia",
+        "cena": "Riso basmati al curry/curcuma con carote e zucchine",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "giovedi": {
+        "colazione": "Pane tostato 50 g + 1 uovo strappazzate + ¼ avocado",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Riso nero con salmone affumicato + zucchine e rucola",
+        "spuntino_pomeridiano": "3 wasa + ceci tostati",
+        "cena": "2 burger vegetali + melanzane grigliata + wasa",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "venerdi": {
+        "colazione": "1 bicchiere di kefir + muesli + semi di lino/chia",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Quinoa con tonno e piselli",
+        "spuntino_pomeridiano": "1 barretta equilibra",
+        "cena": "Carpaccio pesce spada + melanzane grigliate e zucchine + pane integrale",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "sabato": {
+        "colazione": "Porridge con ½ banana cannella e 1 quadrato cacao",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Piadina integrale salmone velo crescenza e zucchine",
+        "spuntino_pomeridiano": "3 wasa + ½ confezione fiocchi di latte",
+        "cena": "PASTA LIBERO (con moderazione)",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "domenica": {
+        "colazione": "Pancake con farina di avena e albume + crema di frutta secca 100%",
+        "spuntino": "-",
+        "pranzo": "Pasta integrale con ricotta e crema di zucchine",
+        "spuntino_pomeridiano": "3 wasa + ½ confezione fiocchi di latte ti",
+        "cena": "Pesce al forno + patate + insalata di fagiolini cipolla pomodori",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      }
+    },
+    "4": {
+      "lunedi": {
+        "colazione": "1 yogurt di soia naturale + cereali all bran prebiotic + 2 zucchiaini semi di lino tritati",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Riso basmati piselli carote 2 uova strappazzate",
+        "spuntino_pomeridiano": "10 mandorle + 3 wasa",
+        "cena": "Pollo alle mandorle (vedi ricetta) + zucchine e carote saltate + 4 wasa",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "martedi": {
+        "colazione": "50 g pane segale tostato + 2 fette bresaola + velo philadelphia",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Insalata patate lesse ceci fagiolini pomodori al pesto",
+        "spuntino_pomeridiano": "1 yogurt greco 2% + 1 manciata mirtilli",
+        "cena": "Vellutata di zucca + frittaina di spinaci con 2 uova + 4-5 wasa",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "mercoledi": {
+        "colazione": "1 yogurt intero greco + cereali all bran prebiotic + 2 zucchiaini semi di lino tritati",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Insalata di gamberi mango e mandorle (vedi ricetta) + 4-5 wasa fibre",
+        "spuntino_pomeridiano": "3 wasa + 20 g ceci secchi tostati",
+        "cena": "Insalata di gamberi mango e mandorle (vedi ricetta) + 4-5 wasa fibre",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "giovedi": {
+        "colazione": "1 toast integrale tacchino e formaggio",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Zucchine al forno ripieno di tacchino macinato di tacchino + insalata mista",
+        "spuntino_pomeridiano": "1 yogurt greco 0% + 8 mandorle + truvia",
+        "cena": "Avocado toast con salmone affumicato e pane integrale",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "venerdi": {
+        "colazione": "1 yogurt + cacao + 3 noci + muesli",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "Farro con salmone affumicato e pomodorini",
+        "spuntino_pomeridiano": "1 quadrato cioccolato fondente + 3 noci",
+        "cena": "Sogliola impanata con farina di mais + insalata di finocchi e arance + pane integrale",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "sabato": {
+        "colazione": "2 uova occhio di bue + ¼ avocado + 1 fetta pane integrale",
+        "spuntino": "10 mandorle o 4 noci o 2 cubetti parmigiano\nOppure 1 paccetto crackers di legumi o protein G (facoltativo)",
+        "pranzo": "1 piadina di farro con hummus e verdura grigliata",
+        "spuntino_pomeridiano": "3 gallette + crema di nocciole tostate",
+        "cena": "PASTA LIBERO (con moderazione)",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      },
+      "domenica": {
+        "colazione": "Frittaina di albume + 1 quadrato cioccolato fuso + 1 fetta pane integrale tostato",
+        "spuntino": "-",
+        "pranzo": "Pasta integrale con melanzane pomodorini e ricotta stagionata",
+        "spuntino_pomeridiano": "1 yogurt + 1 frutto",
+        "cena": "Insalata di farro con lenticchie cipollotti pomodori",
+        "dopo_cena": "1 quadrato cioccolato 80% o 3 zucchiaini budino proteico al cioccolato o 1 yogurt con cacao amaro o 1 frutto"
+      }
+    }
+  },
+  "INVERNO": {
+    "1": {
+      "lunedi": {
+        "colazione": "Yogurt greco SL + 1 manciata frutta secca + 2 zucchiai granola + uva a pezzetti",
+        "spuntino": "1 ricotta + cacao + stevia + cocco in scaglie",
+        "pranzo": "Bruschette di pane di segale 70 g (1 fetta grande) + pomodorini saltati e broccoli ummus + insalata barbabietola",
+        "cena": "Insalata cavolo carote yogurt senape limone + 2 uova + 3 wasa fibre",
+        "dopo_cena": "-"
+      },
+      "martedi": {
+        "colazione": "Overnight porridge con mela cannella + 1 cucchiaino crema di mandorle",
+        "spuntino": "Yogurt + 1 cucchiaio granola",
+        "pranzo": "60 g riso con 2 uova strappazzate piselli zucchine carote al curry",
+        "cena": "Merluzzo infarinato con mais + 3 wasa fibre + spinaci",
+        "dopo_cena": "-"
+      },
+      "mercoledi": {
+        "colazione": "1 toast con ½ avocado + 1 uovo + 1 spremuta",
+        "spuntino": "3-4 noci pecan + 1 banana",
+        "pranzo": "Es. mensa verdera + secondo + 1 bocconcino pane integrale",
+        "cena": "Insalata di 150 g pollo e finocchio ½ arancia e cucamole + 30g tortilla",
+        "dopo_cena": "-"
+      },
+      "giovedi": {
+        "colazione": "Yogurt greco SL + 1 manciata frutta secca + 2 zucchiai granola + 1 kiwi",
+        "spuntino": "Yogurt + 1 cucchiaio granola",
+        "pranzo": "60 g riso nero con 150 g gamberi e piselli + spinaci",
+        "cena": "Tofu 80-100 g con cipolla caramellata + insalata cavolo",
+        "dopo_cena": "-"
+      },
+      "venerdi": {
+        "colazione": "2 fette integrali + marmellata + 2 zucchiaini burro arachidi",
+        "spuntino": "1 quadrato cioccolato fondente + 3 noci",
+        "pranzo": "60 g pasta integrale + broccoli e 70 g feta",
+        "cena": "Patate dolci paprika all'olio di cocco 200 g + 1 trancio di salmone gratinata + porri saltati",
+        "dopo_cena": "-"
+      },
+      "sabato": {
+        "colazione": "1 fetta pane integrale + velo philadelphia + marmellata",
+        "spuntino": "1 frutto + 1 manciata frutta secca",
+        "pranzo": "60 g pasta di avena con broccoli uvetta, pinoli",
+        "cena": "PASTA LIBERO (con moderazione)",
+        "dopo_cena": "-"
+      },
+      "domenica": {
+        "colazione": "1 fetta pane integrale + 1 uovo + ½ avocado + 1 spremuta",
+        "spuntino": "1 frutto + 1 pezzo cioccolato",
+        "pranzo": "120 g gnocchi con 120 g piselli + funghi al latte di cocco e curcuma",
+        "cena": "Vellutata latte di cocco zucca patate + 70-80 g tempeh grigliato con paprika + 3 wasa",
+        "dopo_cena": "-"
+      }
+    },
+    "2": {
+      "lunedi": {
+        "colazione": "1 yogurt intero greco + cereali all bran prebiotic + 2 zucchiaini semi di lino tritati",
+        "spuntino": "1 ricotta + cacao + stevia + cocco in scaglie",
+        "pranzo": "60 g pasta di avena con 120 g piselli funghi latte cocco con curcuma",
+        "cena": "50 g pane integrale + insalata 120 g ceci ½ avocado pomodorini 100 g gamberi",
+        "dopo_cena": "-"
+      },
+      "martedi": {
+        "colazione": "Pane integrale 1 fetta + 2 zucchiaini burro arachidi burro arachidi + 2 zucchiaini cucchiaini marmellata",
+        "spuntino": "Yogurt + 1 cucchiaio granola",
+        "pranzo": "Insalata di 150 g fagiolini rossi cavolo noci senape + 3 wasa",
+        "cena": "Bowl 40 g riso basmati + tofu strappazzato con paprika ½ scatoletta mais broccoli saltati carote",
+        "dopo_cena": "-"
+      },
+      "mercoledi": {
+        "colazione": "1 yogurt intero greco + cereali all bran prebiotic + 2 zucchiaini semi di lino tritati",
+        "spuntino": "3-4 noci pecan + 1 banana",
+        "pranzo": "Es. mensa",
+        "cena": "Frittata con 2 uova bieta e feta +finocchi/carote + 3 wasa",
+        "dopo_cena": "-"
+      },
+      "giovedi": {
+        "colazione": "Porridge overnight con kiwi velo di yogurt e gocce di cioccolato",
+        "spuntino": "1 yogurt + 1 cucchiaio granola",
+        "pranzo": "60 g risotto funghi parmigiano",
+        "cena": "120 g coniglio olive pinoli + broccoli saltati + 3 wasa",
+        "dopo_cena": "-"
+      },
+      "venerdi": {
+        "colazione": "Pane segale 50 g + 50 g hummus + pomodorini",
+        "spuntino": "1 quadrato cioccolato fondente + 3 noci",
+        "pranzo": "60 g miglio o riso con zucca e 120 g ceci",
+        "cena": "3 wasa fibre + 150 g soglolia/platessa gratinata+ zucca al pomodoro",
+        "dopo_cena": "-"
+      },
+      "sabato": {
+        "colazione": "Pane tostato 50 g + 50 g salmone affumicato ½ avocado",
+        "spuntino": "1 frutto + 1 manciata frutta secca",
+        "pranzo": "150 g orata/branzino con pomodorini e olive + insalata mista + 3 wasa",
+        "cena": "PASTA LIBERO (con moderazione)",
+        "dopo_cena": "-"
+      },
+      "domenica": {
+        "colazione": "Pancake con farina di avena e albume + 1 quadrato cioccolato fondente",
+        "spuntino": "1 frutto + 1 pezzo cioccolato",
+        "pranzo": "4-5 falafel + salsa yogurt + insalata mista + 3 wasa",
+        "cena": "Insalata greca con feta cipolla cetrioli pomodori",
+        "dopo_cena": "-"
+      }
+    },
+    "3": {
+      "lunedi": {
+        "colazione": "Porridge caldo con pera e cannella + 1 quadrato cioccolato o crema di mandorle 100%",
+        "spuntino": "1 ricotta + cacao + stevia + cocco in scaglie",
+        "pranzo": "Pane segale 50 g + 120 g hummus canapa barbabietola + carote",
+        "cena": "120 g pollo con farina di riso funghi porri e salsa soia + crostini di pane integrale",
+        "dopo_cena": "-"
+      },
+      "martedi": {
+        "colazione": "2 fette biscottate integrali + velo yogurt SL + marmellata 3 cucchiai",
+        "spuntino": "Yogurt + 1 cucchiaio granola",
+        "pranzo": "Insalata finocchi mela uvetta noci tostata + 120 g ceci + 3 wasa",
+        "cena": "Polpo + 200 g patate + insalata di finocchi e carote",
+        "dopo_cena": "-"
+      },
+      "mercoledi": {
+        "colazione": "Pane integrale 1 quadrato cioccolato fondente fuso + 1 yogurt intero",
+        "spuntino": "3-4 noci pecan + 1 banana",
+        "pranzo": "70 g pasta di legumi al pomodoro e lievito alimentare + pane pane segale",
+        "cena": "Insalata di cavolo mela e noci + tofu o tempeh alla paprika + 3 wasa",
+        "dopo_cena": "-"
+      },
+      "giovedi": {
+        "colazione": "Pane tostato 50 g + 1 uovo strappazzate + ½ avocado",
+        "spuntino": "1 yogurt greco 0% + 8 mandorle + truvia",
+        "pranzo": "60 g riso basmati + 2 uova strappazzate + cavolo verza e 150 g fagiolini granella arachidi zucchine carote",
+        "cena": "Insalata 2 mozzarelle senza lattosio scaglie grana noci + 50 g pane integrale",
+        "dopo_cena": "-"
+      },
+      "venerdi": {
+        "colazione": "60 g riso basmati + 2 uova strappazzate cavolo salato con olio di cocco",
+        "spuntino": "1 quadrato cioccolato fondente + 3 noci",
+        "pranzo": "Gnochi 120 g + crema di zucca capriño 70 g",
+        "cena": "50 g pane di segale con crema di ½ avocado e 2 uova + insalata",
+        "dopo_cena": "-"
+      },
+      "sabato": {
+        "colazione": "Porridge con pera e cannella + 1 quadrato cacao o crema di mandorle 100%",
+        "spuntino": "1 frutto + 1 manciata frutta secca",
+        "pranzo": "Orata al forno (circa 150 g a persona) + patate al forno 200 g + insalata mista",
+        "cena": "PASTA LIBERO (con moderazione)",
+        "dopo_cena": "-"
+      },
+      "domenica": {
+        "colazione": "1 toast integrale + 2 fette prosciutto e formaggio",
+        "spuntino": "1 frutto + 1 pezzo cioccolato",
+        "pranzo": "½ panetto cubetti di tofu al latte di cocco e curry + carote/zucchine salsa soia",
+        "cena": "Vellutata di zucca + 120 g ceci al rosmarino o cavolo viola + 2 uova + insalata",
+        "dopo_cena": "-"
+      }
+    },
+    "4": {
+      "lunedi": {
+        "colazione": "Yogurt greco SL + 1 manciata frutta secca + 2 zucchiai granola + uva a pezzetti",
+        "spuntino": "1 ricotta + cacao + stevia + cocco in scaglie",
+        "pranzo": "60 g riso basmati 80-100 g tofu latte di cocco zucchine carote curry salsa soia",
+        "cena": "Polpette zucca con ripieno di formaggio SL con pangrattato e spezie + 2 uova",
+        "dopo_cena": "-"
+      },
+      "martedi": {
+        "colazione": "Overnight porridge con mela cannella + 1 cucchiaino crema di mandorle",
+        "spuntino": "Yogurt + 1 cucchiaio granola",
+        "pranzo": "60 g pasta con cavolfiore e 80 g tonno olive + broccoli saltati carote",
+        "cena": "Insalata di spinacino feta per noci aceto balssamico + 3 wasa",
+        "dopo_cena": "-"
+      },
+      "mercoledi": {
+        "colazione": "1 toast con ½ avocado + 1 uovo + 1 spremuta",
+        "spuntino": "3-4 noci pecan + 1 banana",
+        "pranzo": "Es. mensa",
+        "cena": "Piadina integrale con hummus 120 g ceci zucchine melanzane grigliate",
+        "dopo_cena": "-"
+      },
+      "giovedi": {
+        "colazione": "Yogurt greco SL + 1 manciata frutta secca + 2 zucchiai granola + 1 kiwi",
+        "spuntino": "1 yogurt greco 0% + 8 mandorle + truvia",
+        "pranzo": "60 g riso basmati + 2 uova strappazzate + cavolo saltato con olio di cocco",
+        "cena": "Zuppa di latte di cocco spinaci patate zucca 120 g ceci + 2 wasa",
+        "dopo_cena": "-"
+      },
+      "venerdi": {
+        "colazione": "3 fette integrali + philadelphia e marmellata",
+        "spuntino": "1 quadrato cioccolato fondente + 3 noci",
+        "pranzo": "2 uova all'occhio di bue + 50 g pane segale + ½ avocado + insalata",
+        "cena": "PASTA LIBERO (con moderazione)",
+        "dopo_cena": "-"
+      },
+      "sabato": {
+        "colazione": "1 toast integrale + 2 fette prosciutto e formaggio",
+        "spuntino": "1 frutto + 1 manciata frutta secca",
+        "pranzo": "Broccoli filanti al forno con formaggio a scelta senza lattosio 80 g + 50 g pane",
+        "cena": "PASTA LIBERO (con moderazione)",
+        "dopo_cena": "-"
+      },
+      "domenica": {
+        "colazione": "1 fetta pane integrale + 1 uovo + ½ avocado + 1 spremuta",
+        "spuntino": "1 frutto + 1 pezzo cioccolato",
+        "pranzo": "150 g pesce e 200 g patate + insalata finocchi mela uvetta noci cipollotti pomodori",
+        "cena": "Vellutata di zucca + 120 g ceci al rosmarino",
+        "dopo_cena": "-"
+      }
+    }
+  },
+  "PRIMAVERA": {
+    "SETTIMANA_1": {
+      "LUNEDI": {
+        "colazione": "Pane segale 50 g + 50-60 g hummus + pomodorini saltati",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g cous cous 120 g lenticchie pomodori secchi pesto Pranzo",
+        "spuntino_2": "1 ricotta + cacao + stevia + cocco in scaglie",
+        "cena": "Trancio di pesce infarinato con farina di mais 150 g + zucchine + 2 crostini integrali Cena 30 g triangolini mais con guacamole pomodorini + 1 rustichella di pollo + insalata di carote"
+      },
+      "MARTEDI": {
+        "colazione": "Pane segale 50 g + 50-60 g hummus + pomodorini saltati",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g cous cous 120 g lenticchie pomodori secchi pesto Insalata con sedano ½ mela 3 noci + 100 g tofu in friggitrice + pane 50 g",
+        "spuntino_2": "Yogurt + 1 cucchiaio granola",
+        "cena": "30 g triangolini mais con guacamole pomodorini + 1 rustichella di pollo + insalata di carote Trancio di pesce infarinato con farina di mais 150 g + zucchine + 2 crostini integrali"
+      },
+      "MERCOLEDI": {
+        "colazione": "50 g segale + ricotta ½ + miele + 2 noci",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g riso con 80 g tonno e zucchine 60 g riso basmati + 120 g ceci al latte di cocco + chips di carote alla paprika",
+        "spuntino_2": "3-4 noci pecan + 1 banana",
+        "cena": "Frittata di spinaci + chips di carote alla paprika + 2 crostini integrali Insalata con rucola 2 mozzarelline 100 g melone con aceto balsamico + 30 g pane segale"
+      },
+      "GIOVEDI": {
+        "colazione": "50 g segale + ricotta ½ + miele + 2 noci",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g riso basmati + 120 g ceci al latte di cocco + chips di carote alla paprika 60 g riso con 80 g tonno e zucchine",
+        "spuntino_2": "Yogurt + 1 cucchiaio granola",
+        "cena": "Insalata con rucola 2 mozzarelline 100 g melone con aceto balsamico + 30 g pane segale Frittata di spinaci + chips di carote alla paprika + 2 crostini integrali"
+      },
+      "VENERDI": {
+        "colazione": "2 fette integrali +",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g cous cous con 150 g gamberetti piselli",
+        "spuntino_2": "1 quadrato cioccolato fondente + 3 noci",
+        "cena": "1 confez. fiocchi di latte senza lattosio + insalata mela sedano noci + patate lesse 200 g"
+      },
+      "SABATO": {
+        "colazione": "1/3 di tortino fatto in casa",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g pasta di piselli con funghi e panna vegetale o latte di cocco",
+        "spuntino_2": "1 frutto + 1 manciata frutta secca",
+        "cena": "PASTO LIBERO (con moderazione)"
+      },
+      "DOMENICA": {
+        "colazione": "1/3 di tortino fatto in casa",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "120 g gnocchi pomodorini saltati con 70 g feta SL + 1 cucchiaio pesto",
+        "spuntino_2": "",
+        "cena": "150 g pollo infarinato al limone e curry + piselli e carote saltati al"
+      }
+    },
+    "SETTIMANA_2": {
+      "LUNEDI": {
+        "colazione": "Colazione Thè verde",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "Pranzo 1 piadina integrale + 80 g salmone affumicato e crema di ½ avocado",
+        "spuntino_2": "1 ricotta + cacao + stevia + cocco in scaglie",
+        "cena": "Tofu 100 g strapazzato con piselli e carote al curry + 2 crostini Cena"
+      },
+      "MARTEDI": {
+        "colazione": "Pane integrale 1",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "Insalata di fagiolini, ½ avocado, cipollotto e 2 uova sode + pane di segale 50-70 g",
+        "spuntino_2": "Yogurt + 1 cucchiaio granola",
+        "cena": "Brazino/orata + Insalata di ½ avocado e rucola + 150 g patate"
+      },
+      "MERCOLEDI": {
+        "colazione": "1 yogurt intero",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "1 fresella integrale + pomodori e basilico + 150 g fagioli cannellini",
+        "spuntino_2": "3-4 noci pecan + 1 banana",
+        "cena": "piselli in umido 120 g + lievito alimentare + Insalata barbabietola con"
+      },
+      "GIOVEDI": {
+        "colazione": "Porridge",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g cous cous con 120 g lenticchie e melanzane al curry",
+        "spuntino_2": "Yogurt + 1 cucchiaio granola",
+        "cena": "100 g primosale o mozzarella senza lattosio con pomodori in insalata + mais + 2"
+      },
+      "VENERDI": {
+        "colazione": "Pane segale 50 g + 50 g hummus + pomodorini",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g riso basmati con 2 uova strapazzate e piselli 150 g pollo al curry + funghi, carote, cipolla con olio di cocco",
+        "spuntino_2": "1 quadrato cioccolato fondente + 3 noci",
+        "cena": "Trancio di trota salmonata + asparagi + 2 crostini integrali PASTO LIBERO (con moderazione)"
+      },
+      "SABATO": {
+        "colazione": "Pane tostato 50 g + 50 g salmone affumicato + ½ avocado",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "150 g pollo al curry + funghi, carote, cipolla con olio di cocco 60 g riso basmati con 2 uova strapazzate e piselli 60 g riso con asparagi e parmigiano",
+        "spuntino_2": "1 frutto + 1 manciata frutta secca",
+        "cena": "PASTO LIBERO (con moderazione) Trancio di trota salmonata + asparagi + 2 crostini integrali Burger vegetale + insalata finocchi arancia 3 noci tostate"
+      },
+      "DOMENICA": {
+        "colazione": "1/3 di tortino fatto in casa",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g riso con asparagi e parmigiano 150 g pollo al curry + funghi, carote, cipolla con olio di cocco",
+        "spuntino_2": "1 frutto + 1 manciata frutta secca",
+        "cena": "Burger vegetale + insalata finocchi arancia 3 noci tostate PASTO LIBERO (con moderazione)"
+      }
+    },
+    "SETTIMANA_3": {
+      "LUNEDI": {
+        "colazione": "1/3 di tortino fatto in casa",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g pasta pomodorini 150 g pesce spada",
+        "spuntino_2": "1 ricotta + cacao + stevia + cocco in scaglie",
+        "cena": "Insalata 50-60 g feta SL cipolla cetrioli pomodori + 2 crostini"
+      },
+      "MARTEDI": {
+        "colazione": "Pane segale 50 g + 50 g hummus + pomodorini",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g riso con 120 g piselli zucchine curcuma lievito alimentare 60 g pasta con 50 g feta SL e broccoli",
+        "spuntino_2": "Yogurt + 1 cucchiaio granola",
+        "cena": "Insalata fagiolini + pomodori + 2 uova + 2 crostini 70 g pasta di lenticchie con pomodoro e parmigiano + insalata di finocchi + 2 crostini"
+      },
+      "MERCOLEDI": {
+        "colazione": "Pane segale 50 g + 50 g hummus + pomodorini",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g pasta con 50 g feta SL e broccoli 60 g riso con 120 g piselli zucchine curcuma lievito alimentare",
+        "spuntino_2": "3-4 noci pecan + 1 banana",
+        "cena": "70 g pasta di lenticchie con pomodoro e parmigiano + insalata di finocchi + 2 crostini Insalata fagiolini + pomodori + 2 uova + 2 crostini"
+      },
+      "GIOVEDI": {
+        "colazione": "Pane tostato 50 g + 1 uovo strapazzate + ½ avocado",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g riso basmati 120 g pollo zucchine zafferano 120 gnocchi zucchine 100 g caprino senza lattosio zafferano",
+        "spuntino_2": "Yogurt + 1 cucchiaio granola",
+        "cena": "150 g pollo con funghi + pane segale 30 g Frittata con 2 uova con porri + spinaci + 30 g pane segale"
+      },
+      "VENERDI": {
+        "colazione": "1 bicchiere di kefir + muesli + semi di lino/chia",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "120 gnocchi zucchine 100 g caprino senza lattosio zafferano",
+        "spuntino_2": "1 quadrato cioccolato fondente + 3 noci",
+        "cena": "Frittata con 2 uova con porri + spinaci + 30 g pane segale"
+      },
+      "SABATO": {
+        "colazione": "Porridge con ½ banana cannella e 1 quadrato cacao",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "Insalata verdure miste con 70 g salmone 1/2 avocado rucola + 2 crostini",
+        "spuntino_2": "1 frutto + 1 manciata frutta secca",
+        "cena": "PASTO LIBERO (con moderazione)"
+      },
+      "DOMENICA": {
+        "colazione": "1/3 di tortino fatto in casa",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "60 g spaghetti tipo di riso con 150 g gamberi carote zucchine",
+        "spuntino_2": "",
+        "cena": "Tempeh grigliato 70-80 g con paprika in insalata con pomodorini salsa"
+      }
+    },
+    "SETTIMANA_4": {
+      "LUNEDI": {
+        "colazione": "manciata frutta",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "",
+        "spuntino_2": "",
+        "cena": "1 ricotta + cacao + stevia + cocco in scaglie Insalata cavolo carote yogurt senape limone + 2 uova + 2 crostini Cena"
+      },
+      "MARTEDI": {
+        "colazione": "",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "",
+        "spuntino_2": "",
+        "cena": "Yogurt + 1 frutto 3-4 noci pecan + 1 banana Coniglio 120 g con olive + carciofi in padella o radicchio con aceto balsamico + 2 wasa Burger vegetale + insalata finocchi arance uvetta + 2 crostini"
+      },
+      "MERCOLEDI": {
+        "colazione": "",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "",
+        "spuntino_2": "",
+        "cena": "3-4 noci pecan + 1 banana Yogurt + 1 frutto Yogurt + 1 cucchiaio granola Burger vegetale + insalata finocchi arance uvetta + 2 crostini Coniglio 120 g con olive + carciofi in padella o radicchio con aceto balsamico + 2 wasa Farinata di ceci in padella + finocchi in insalata e carote + 2 wasa"
+      },
+      "GIOVEDI": {
+        "colazione": "porridge 30 g",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "",
+        "spuntino_2": "",
+        "cena": "Yogurt + 1 cucchiaio granola 3-4 noci pecan + 1 banana Farinata di ceci in padella + finocchi in insalata e carote + 2 wasa Burger vegetale + insalata finocchi arance uvetta + 2 crostini"
+      },
+      "VENERDI": {
+        "colazione": "",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "",
+        "spuntino_2": "",
+        "cena": "1 quadrato cioccolato fondente + 3 noci 1 frutto + 1 manciata frutta secca 100 g tofu con cipolle caramellate + carote/ zucchine + 2 crostini PASTO LIBERO (con moderazione)"
+      },
+      "SABATO": {
+        "colazione": "",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "pane di segale 70 g (1 fetta grande) + 100 g hummus +",
+        "spuntino_2": "insalata",
+        "cena": "barbabietola 1 frutto + 1 manciata frutta secca 1 quadrato cioccolato fondente + 3 noci PASTO LIBERO (con moderazione) 100 g tofu con cipolle caramellate + carote/ zucchine + 2 crostini"
+      },
+      "DOMENICA": {
+        "colazione": "integrale + 1",
+        "spuntino": "1 manciata frutta secca + 2 gallette/wasa",
+        "pranzo": "",
+        "spuntino_2": "",
+        "cena": "Fiocchi di latte senza lattosio in insalata e"
+      }
+    }
+  }
+}
