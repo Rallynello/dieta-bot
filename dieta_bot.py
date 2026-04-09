@@ -1471,26 +1471,13 @@ async def salva_settimana_con_nome(update: Update, context: ContextTypes.DEFAULT
         await update.message.reply_text("❌ Nessuna settimana da salvare!")
         return
     
-    # Carica o crea il file settimane_salvate.json
+    # Salva nel database PostgreSQL
     try:
-        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
-            settimane_salvate = json.load(f)
-    except FileNotFoundError:
-        settimane_salvate = {}
-    
-    # Aggiungi l'utente se non esiste
-    if str(user_id) not in settimane_salvate:
-        settimane_salvate[str(user_id)] = {}
-    
-    # Salva la settimana con il nome
-    settimane_salvate[str(user_id)][nome_settimana] = {
-        'data_creazione': str(__import__('datetime').datetime.now()),
-        'settimana': settimana
-    }
-    
-    # Scrivi su file
-    with open('settimane_salvate.json', 'w', encoding='utf-8') as f:
-        json.dump(settimane_salvate, f, ensure_ascii=False, indent=2)
+        save_settimana(user_id, nome_settimana, settimana)
+    except Exception as e:
+        logger.error(f"Errore salva_settimana_con_nome: {e}")
+        await update.message.reply_text(f"❌ Errore nel salvataggio: {e}")
+        return
     
     # Pulisci il flag
     context.user_data['in_salvataggio'] = False
