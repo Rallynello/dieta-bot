@@ -1,1 +1,1 @@
-worker: cd dieta-bot && python3 dieta_bot.py
+worker: python3 dieta-bot/dieta_bot.py
