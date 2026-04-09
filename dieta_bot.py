@@ -1014,13 +1014,15 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
         [
             InlineKeyboardButton("☀️ ESTATE", callback_data="stagione_ESTATE"),
             InlineKeyboardButton("🌱 PRIMAVERA", callback_data="stagione_PRIMAVERA"),
-            InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")
+        ],
+        [
+            InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO"),
         ],
         [InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start")],
         [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
         [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
         [InlineKeyboardButton("🛒 LISTA DELLA SPESA", callback_data="lista_spesa_start")],
-        [InlineKeyboardButton("🔄 RESETTA CREDENZIALI BRING", callback_data="reset_bring_credentials")],
+        [InlineKeyboardButton("🔄 RESETTA BRING", callback_data="reset_bring_credentials")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
