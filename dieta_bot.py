@@ -950,7 +950,42 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         nome_settimana = data.replace("lista_spesa_da_salvata_", "")
         await salva_lista_spesa_da_settimana_salvata(query, update.effective_user.id, nome_settimana, context)
     
-    # Bring - inizio flusso
+    # Bring - inizio flusso DA LISTA DELLA SPESA (con filtro spuntati)
+    elif data.startswith("bring_start_lista_"):
+        nome_lista = data.replace("bring_start_lista_", "")
+        dati_lista = get_lista_spesa(update.effective_user.id, nome_lista)
+        
+        if not dati_lista:
+            await query.answer("❌ Lista non trovata!", show_alert=True)
+            return
+        
+        # Filtra SOLO ingredienti spuntati
+        ingredienti_spuntati = [
+            ing_data['nome'] for ing_data in dati_lista.get('ingredienti', {}).values()
+            if ing_data.get('spuntato', False)
+        ]
+        
+        if not ingredienti_spuntati:
+            await query.answer("⚠️ Nessun ingrediente selezionato! Spunta almeno uno.", show_alert=True)
+            return
+        
+        # Salva in context per il flusso Bring
+        context.user_data['bring_nome_lista'] = nome_lista
+        context.user_data['bring_ingredienti'] = ingredienti_spuntati
+        context.user_data['bring_lista_spesa_source'] = nome_lista  # Per resettare dopo
+        
+        credenziali = get_bring_credentials(update.effective_user.id)
+        if credenziali:
+            await mostra_liste_bring(query, update.effective_user.id, nome_lista, ingredienti_spuntati, context)
+        else:
+            context.user_data['in_bring_email'] = True
+            await query.edit_message_text(
+                "📧 *Dimmi la tua email Bring:*\n\n"
+                "(Puoi crearla su https://web.getbring.com)",
+                parse_mode="Markdown"
+            )
+    
+    # Bring - inizio flusso STANDARD
     elif data == "bring_start":
         logger.info(f"🔵 DEBUG: bring_start trigger")
         nome_lista = context.user_data.get('current_lista_spesa')
@@ -990,6 +1025,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ingredienti = context.user_data.get('bring_ingredienti', [])
         email = context.user_data.get('bring_email')
         password = context.user_data.get('bring_password')
+        lista_spesa_source = context.user_data.get('bring_lista_spesa_source')  # Nome lista della spesa originale
         
         if email and password and nome_lista:
             await query.edit_message_text("⏳ *Caricamento ingredienti su Bring...*", parse_mode="Markdown")
@@ -998,9 +1034,23 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if items_added > 0:
                 lista_name = context.user_data.get('bring_lista_name_target', 'Bring')
                 save_bring_credentials(update.effective_user.id, email, password, lista_uuid, lista_name)
+                
+                # Resetta gli spuntati nella lista della spesa originale
+                if lista_spesa_source:
+                    dati_lista = get_lista_spesa(update.effective_user.id, lista_spesa_source)
+                    if dati_lista:
+                        ingredienti_dict = dati_lista.get('ingredienti', {})
+                        # Resetta TUTTI gli ingredienti a spuntato: False
+                        for idx in ingredienti_dict:
+                            ingredienti_dict[idx]['spuntato'] = False
+                        # Salva nel DB
+                        save_lista_spesa(update.effective_user.id, lista_spesa_source, 
+                                        dati_lista.get('stagione'), dati_lista.get('settimana_num'), 
+                                        ingredienti_dict)
+                
                 await query.edit_message_text(
-                    f"✅ *Caricati {items_added}/{len(ingredienti)} ingredienti su Bring!*\n\n"
-                    f"📱 Apri l'app Bring per completare gli acquisti",
+                    f"✅ *{items_added} ingredienti inviati a {lista_name}!*\n\n"
+                    f"📋 Lista della spesa resettata",
                     parse_mode="Markdown",
                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🏠 HOME", callback_data="home")]])
                 )
@@ -2276,7 +2326,7 @@ async def visualizza_lista_spesa(query, user_id, nome_lista, context=None):
         text += "\n"
     
     keyboard.append([InlineKeyboardButton("🗑️ ELIMINA", callback_data=f"elimina_lista_spesa_{nome_lista}")])
-    keyboard.append([InlineKeyboardButton("📤 INVIA A BRING", callback_data="bring_start")])
+    keyboard.append([InlineKeyboardButton("📤 INVIA A BRING", callback_data=f"bring_start_lista_{nome_lista}")])
     keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="lista_spesa_start")])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
