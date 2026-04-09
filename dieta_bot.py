@@ -415,10 +415,10 @@ async def fetch_bring_lists(email: str, password: str) -> list | None:
             await bring.login()
             result = await bring.load_lists()
             
-            lists_data = result.get('lists', [])
+            # result è un BringListResponse con attributo .lists
             bring_lists = [
-                {'name': lst.get('name', 'Senza nome'), 'listUuid': lst.get('listUuid')}
-                for lst in lists_data if lst.get('listUuid')
+                {'name': lst.name, 'listUuid': lst.listUuid}
+                for lst in result.lists
             ]
             
             logger.info(f"✅ Fetched {len(bring_lists)} liste da Bring")
