@@ -1661,14 +1661,21 @@ async def visualizza_giorno_settimana_salvata(query, user_id, nome_settimana, gi
     giorno_num = int(giorno_idx) + 1
     giorno_nome = giorno_data.get('giorno', 'Sconosciuto')
     
-    text = f"📅 <b>Giorno {giorno_num}: {giorno_nome}</b>\n\n"
+    text = f"📅 *Giorno {giorno_num}: {giorno_nome}*\n\n"
     
-    # Mostra il menu
+    # Ordine corretto dei pasti
+    ordine_pasti = ["colazione", "spuntino", "pranzo", "spuntino_2", "cena", "dopo_cena"]
+    
+    # Mostra il menu con ordine e emoji corretti
     menu = giorno_data.get('menu', {})
     if menu:
-        for pasto, descrizione in menu.items():
-            if isinstance(descrizione, str):
-                text += f"<b>{pasto.upper()}</b>\n{descrizione}\n\n"
+        for pasto in ordine_pasti:
+            if pasto in menu:
+                descrizione = menu.get(pasto, "N/A")
+                if isinstance(descrizione, str):
+                    emoji = EMOJI_PASTI.get(pasto, "🍽️")
+                    pasto_nome = pasto.upper().replace("_", " ")
+                    text += f"{emoji} *{pasto_nome}*\n{descrizione}\n\n"
     
     keyboard = [
         [InlineKeyboardButton("⬅️ Indietro", callback_data=f"visualizza_settimana_{nome_settimana}")],
@@ -1676,7 +1683,7 @@ async def visualizza_giorno_settimana_salvata(query, user_id, nome_settimana, gi
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="HTML")
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
 
 async def salva_settimana_con_nome_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Wrapper per gestire il salvataggio, ricerca ingrediente, creazione settimana vuota, o credenziali Bring"""
