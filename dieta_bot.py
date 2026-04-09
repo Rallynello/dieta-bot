@@ -2332,6 +2332,8 @@ async def mostra_liste_bring(query, user_id, nome_lista, ingredienti, context):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
     
+    context.user_data['bring_nome_lista'] = nome_lista
+    context.user_data['bring_ingredienti'] = ingredienti
     context.user_data['bring_lista_name_target'] = bring_lists[0]['name'] if bring_lists else 'Bring'
 
 async def mostra_liste_bring_da_message(update, context, email, password, nome_lista, ingredienti, bring_lists):
