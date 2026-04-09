@@ -2,14 +2,10 @@
 """
 Runner per lanciare sia il bot Telegram che il server Flask per la mini app
 """
-import asyncio
 import threading
 from pathlib import Path
 from flask import Flask, send_from_directory
 import logging
-
-# Import del bot
-from dieta_bot import main as bot_main
 
 # Configura logging
 logging.basicConfig(level=logging.INFO)
@@ -37,18 +33,27 @@ def health():
 def run_flask():
     """Lancia il server Flask"""
     logger.info("Starting Flask server on port 8000...")
-    app.run(host='0.0.0.0', port=8000, debug=False)
+    try:
+        app.run(host='0.0.0.0', port=8000, debug=False, threaded=True)
+    except Exception as e:
+        logger.error(f"Flask error: {e}")
 
 def run_bot():
     """Lancia il bot Telegram"""
     logger.info("Starting Telegram bot...")
-    asyncio.run(bot_main())
+    try:
+        # Import qui per evitare problemi di circular import
+        from dieta_bot import main as bot_main
+        bot_main()
+    except Exception as e:
+        logger.error(f"Bot error: {e}")
 
 if __name__ == '__main__':
-    # Lancia Flask in un thread separato
-    flask_thread = threading.Thread(target=run_flask, daemon=True)
+    # Lancia Flask in un thread separato (daemon)
+    flask_thread = threading.Thread(target=run_flask, daemon=False)
     flask_thread.start()
     logger.info("Flask thread started")
     
-    # Lancia il bot nel thread principale
+    # Lancia il bot nel main thread
     run_bot()
+
