@@ -547,10 +547,14 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
             InlineKeyboardButton("🌱 PRIMAVERA", callback_data="stagione_PRIMAVERA"),
             InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")
         ],
-        [InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start")],
-        [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
-        [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
-        [InlineKeyboardButton("🛒 LISTA DELLA SPESA", callback_data="lista_spesa_start")],
+        [
+            InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start"),
+            InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")
+        ],
+        [
+            InlineKeyboardButton("🛒 LISTA DELLA SPESA", callback_data="lista_spesa_start"),
+            InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")
+        ],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
@@ -1018,10 +1022,14 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
             InlineKeyboardButton("🌱 PRIMAVERA", callback_data="stagione_PRIMAVERA"),
             InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")
         ],
-        [InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start")],
-        [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
-        [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
-        [InlineKeyboardButton("🛒 LISTA DELLA SPESA", callback_data="lista_spesa_start")],
+        [
+            InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start"),
+            InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")
+        ],
+        [
+            InlineKeyboardButton("🛒 LISTA DELLA SPESA", callback_data="lista_spesa_start"),
+            InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")
+        ],
         [InlineKeyboardButton("🔄 RESETTA BRING", callback_data="reset_bring_credentials")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
