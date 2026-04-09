@@ -995,6 +995,11 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "❌ Errore nel caricamento. Controlla credenziali Bring.",
                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🏠 HOME", callback_data="home")]])
                 )
+    
+    elif data == "reset_bring_credentials":
+        delete_bring_credentials(update.effective_user.id)
+        await query.answer("✅ Credenziali Bring eliminate! La prossima volta dovrai reinserirle.", show_alert=True)
+        await mostra_menu_principale(query)
 
 async def mostra_menu_principale(query):
     """Mostra il menu principale"""
@@ -1013,6 +1018,7 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
         [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
         [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
         [InlineKeyboardButton("🛒 LISTA DELLA SPESA", callback_data="lista_spesa_start")],
+        [InlineKeyboardButton("🔄 RESETTA CREDENZIALI BRING", callback_data="reset_bring_credentials")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
