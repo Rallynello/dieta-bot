@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY dieta-bot/dieta_bot.py .
+COPY dieta_bot.py .
 COPY menu_settimanale.json .
 COPY frasimotivazionali.txt .
 COPY ingredienti_definitivi.json .

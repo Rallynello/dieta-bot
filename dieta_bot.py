@@ -9,12 +9,460 @@ import json
 import logging
 import random
 import os
+import psycopg2
+import psycopg2.extras
+import aiohttp
 from pathlib import Path
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters
+from bring_api import Bring, BringAuthException, BringRequestException
+from cryptography.fernet import Fernet
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# ============================================================
+# ENCRYPTION SETUP
+# ============================================================
+
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
+if not ENCRYPTION_KEY:
+    ENCRYPTION_KEY = Fernet.generate_key()
+    logger.warning("⚠️ ENCRYPTION_KEY non trovata, generata una nuova chiave. Salva questa su Railway ENV!")
+    logger.warning(f"ENCRYPTION_KEY={ENCRYPTION_KEY.decode()}")
+
+cipher = Fernet(ENCRYPTION_KEY)
+
+# ============================================================
+# DATABASE CONNECTION
+# ============================================================
+
+def get_db_connection():
+    """Crea una connessione al database PostgreSQL"""
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        raise Exception("DATABASE_URL non configurato!")
+    
+    try:
+        conn = psycopg2.connect(database_url)
+        return conn
+    except Exception as e:
+        logger.error(f"Errore connessione DB: {e}")
+        raise
+
+def init_db():
+    """Crea le tabelle se non esistono"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS settimane (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                nome_settimana VARCHAR(255) NOT NULL,
+                settimana_data JSONB NOT NULL,
+                data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, nome_settimana)
+            );
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS liste_spesa (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                nome_lista VARCHAR(255) NOT NULL,
+                stagione VARCHAR(50) NOT NULL,
+                settimana_num INTEGER NOT NULL,
+                ingredienti JSONB NOT NULL,
+                data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, nome_lista)
+            );
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS bring_credentials (
+                id SERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL UNIQUE,
+                email_encrypted TEXT NOT NULL,
+                password_encrypted TEXT NOT NULL,
+                lista_uuid_default TEXT,
+                lista_name_default TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        logger.info("✅ Tabelle inizializzate")
+    except Exception as e:
+        logger.error(f"Errore init DB: {e}")
+
+# ============================================================
+# FUNZIONI DATABASE
+# ============================================================
+
+def get_settimane_utente(user_id):
+    """Legge tutte le settimane di un utente"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute(
+            "SELECT nome_settimana, settimana_data FROM settimane WHERE user_id = %s ORDER BY data_creazione",
+            (user_id,)
+        )
+        
+        result = {}
+        for row in cur.fetchall():
+            result[row['nome_settimana']] = {
+                'settimana': row['settimana_data']['settimana'],
+                'data_creazione': str(row['settimana_data'].get('data_creazione', ''))
+            }
+        
+        cur.close()
+        conn.close()
+        return result
+    except Exception as e:
+        logger.error(f"Errore get_settimane_utente: {e}")
+        return {}
+
+def get_settimana(user_id, nome_settimana):
+    """Legge una singola settimana"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute(
+            "SELECT settimana_data FROM settimane WHERE user_id = %s AND nome_settimana = %s",
+            (user_id, nome_settimana)
+        )
+        
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if row:
+            return row['settimana_data']
+        return None
+    except Exception as e:
+        logger.error(f"Errore get_settimana: {e}")
+        return None
+
+def save_settimana(user_id, nome_settimana, settimana_data):
+    """Salva o aggiorna una settimana"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        from datetime import datetime
+        data_creazione = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        data_to_save = {
+            'settimana': settimana_data,
+            'data_creazione': data_creazione
+        }
+        
+        cur.execute(
+            """
+            INSERT INTO settimane (user_id, nome_settimana, settimana_data)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (user_id, nome_settimana) DO UPDATE
+            SET settimana_data = EXCLUDED.settimana_data
+            """,
+            (user_id, nome_settimana, json.dumps(data_to_save))
+        )
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        logger.info(f"✅ Settimana salvata: {user_id} - {nome_settimana}")
+    except Exception as e:
+        logger.error(f"Errore save_settimana: {e}")
+
+def delete_settimana(user_id, nome_settimana):
+    """Elimina una settimana"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute(
+            "DELETE FROM settimane WHERE user_id = %s AND nome_settimana = %s",
+            (user_id, nome_settimana)
+        )
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        logger.info(f"✅ Settimana eliminata: {user_id} - {nome_settimana}")
+    except Exception as e:
+        logger.error(f"Errore delete_settimana: {e}")
+
+def init_liste_spesa_table():
+    """Crea la tabella liste_spesa se non esiste"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS liste_spesa (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                nome_lista VARCHAR(255) NOT NULL,
+                stagione VARCHAR(50) NOT NULL,
+                settimana_num INTEGER NOT NULL,
+                ingredienti JSONB NOT NULL,
+                data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, nome_lista)
+            );
+        """)
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        logger.info("✅ Tabella liste_spesa inizializzata")
+    except Exception as e:
+        logger.error(f"Errore init liste_spesa: {e}")
+
+def save_lista_spesa(user_id, nome_lista, stagione, settimana_num, ingredienti):
+    """Salva una lista della spesa"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute(
+            """
+            INSERT INTO liste_spesa (user_id, nome_lista, stagione, settimana_num, ingredienti)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (user_id, nome_lista) DO UPDATE
+            SET ingredienti = EXCLUDED.ingredienti, stagione = EXCLUDED.stagione, settimana_num = EXCLUDED.settimana_num
+            """,
+            (user_id, nome_lista, stagione, settimana_num, json.dumps(ingredienti))
+        )
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        logger.info(f"✅ Lista spesa salvata: {user_id} - {nome_lista}")
+    except Exception as e:
+        logger.error(f"Errore save_lista_spesa: {e}")
+
+def get_liste_spesa_utente(user_id):
+    """Legge tutte le liste della spesa di un utente"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute(
+            "SELECT nome_lista, stagione, settimana_num, ingredienti FROM liste_spesa WHERE user_id = %s ORDER BY data_creazione",
+            (user_id,)
+        )
+        
+        result = {}
+        for row in cur.fetchall():
+            result[row['nome_lista']] = {
+                'stagione': row['stagione'],
+                'settimana_num': row['settimana_num'],
+                'ingredienti': row['ingredienti']
+            }
+        
+        cur.close()
+        conn.close()
+        return result
+    except Exception as e:
+        logger.error(f"Errore get_liste_spesa_utente: {e}")
+        return {}
+
+def get_lista_spesa(user_id, nome_lista):
+    """Legge una singola lista della spesa"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute(
+            "SELECT stagione, settimana_num, ingredienti FROM liste_spesa WHERE user_id = %s AND nome_lista = %s",
+            (user_id, nome_lista)
+        )
+        
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if row:
+            return {
+                'stagione': row['stagione'],
+                'settimana_num': row['settimana_num'],
+                'ingredienti': row['ingredienti']
+            }
+        return None
+    except Exception as e:
+        logger.error(f"Errore get_lista_spesa: {e}")
+        return None
+
+def delete_lista_spesa(user_id, nome_lista):
+    """Elimina una lista della spesa"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute(
+            "DELETE FROM liste_spesa WHERE user_id = %s AND nome_lista = %s",
+            (user_id, nome_lista)
+        )
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        logger.info(f"✅ Lista spesa eliminata: {user_id} - {nome_lista}")
+    except Exception as e:
+        logger.error(f"Errore delete_lista_spesa: {e}")
+
+# ============================================================
+# BRING CREDENTIALS HELPERS
+# ============================================================
+
+def encrypt_password(password: str) -> str:
+    """Crittografa una password con Fernet"""
+    return cipher.encrypt(password.encode()).decode()
+
+def decrypt_password(encrypted: str) -> str:
+    """Decrittografa una password con Fernet"""
+    return cipher.decrypt(encrypted.encode()).decode()
+
+def save_bring_credentials(user_id: int, email: str, password: str, lista_uuid: str, lista_name: str):
+    """Salva le credenziali Bring criptate nel database"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        email_enc = encrypt_password(email)
+        password_enc = encrypt_password(password)
+        
+        cur.execute(
+            """
+            INSERT INTO bring_credentials (user_id, email_encrypted, password_encrypted, lista_uuid_default, lista_name_default)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (user_id) DO UPDATE
+            SET email_encrypted = EXCLUDED.email_encrypted,
+                password_encrypted = EXCLUDED.password_encrypted,
+                lista_uuid_default = EXCLUDED.lista_uuid_default,
+                lista_name_default = EXCLUDED.lista_name_default,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (user_id, email_enc, password_enc, lista_uuid, lista_name)
+        )
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        logger.info(f"✅ Credenziali Bring salvate per user {user_id}")
+    except Exception as e:
+        logger.error(f"Errore save_bring_credentials: {e}")
+
+def get_bring_credentials(user_id: int) -> dict | None:
+    """Legge le credenziali Bring decrittate dal database"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute(
+            "SELECT email_encrypted, password_encrypted, lista_uuid_default, lista_name_default FROM bring_credentials WHERE user_id = %s",
+            (user_id,)
+        )
+        
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if row:
+            return {
+                'email': decrypt_password(row['email_encrypted']),
+                'password': decrypt_password(row['password_encrypted']),
+                'lista_uuid': row['lista_uuid_default'],
+                'lista_name': row['lista_name_default']
+            }
+        return None
+    except Exception as e:
+        logger.error(f"Errore get_bring_credentials: {e}")
+        return None
+
+def delete_bring_credentials(user_id: int):
+    """Elimina le credenziali Bring di un utente"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("DELETE FROM bring_credentials WHERE user_id = %s", (user_id,))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        logger.info(f"✅ Credenziali Bring eliminate per user {user_id}")
+    except Exception as e:
+        logger.error(f"Errore delete_bring_credentials: {e}")
+
+# ============================================================
+# BRING API FUNCTIONS
+# ============================================================
+
+async def fetch_bring_lists(email: str, password: str) -> list | None:
+    """Fetcha le liste Bring disponibili usando email e password"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            bring = Bring(session, email, password)
+            await bring.login()
+            result = await bring.load_lists()
+            
+            lists_data = result.get('lists', [])
+            bring_lists = [
+                {'name': lst.get('name', 'Senza nome'), 'listUuid': lst.get('listUuid')}
+                for lst in lists_data if lst.get('listUuid')
+            ]
+            
+            logger.info(f"✅ Fetched {len(bring_lists)} liste da Bring")
+            return bring_lists
+    except BringAuthException:
+        logger.error("❌ Bring auth error: credenziali errate")
+        return None
+    except BringRequestException as e:
+        logger.error(f"❌ Bring request error: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"❌ Errore fetch_bring_lists: {e}")
+        return None
+
+async def upload_to_bring(email: str, password: str, lista_uuid: str, ingredienti: list) -> int:
+    """Carica gli ingredienti su una lista Bring"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            bring = Bring(session, email, password)
+            await bring.login()
+            
+            items_added = 0
+            for ingrediente in ingredienti:
+                parts = ingrediente.split(' (x')
+                nome = parts[0].strip()
+                spec = f"x{parts[1]}" if len(parts) > 1 else ""
+                
+                try:
+                    await bring.save_item(lista_uuid, nome, spec)
+                    items_added += 1
+                except Exception as e:
+                    logger.warning(f"⚠️ Errore caricamento ingrediente '{nome}': {e}")
+            
+            logger.info(f"✅ Caricati {items_added}/{len(ingredienti)} ingredienti su Bring")
+            return items_added
+    except BringAuthException:
+        logger.error("❌ Bring auth error durante upload")
+        return 0
+    except BringRequestException as e:
+        logger.error(f"❌ Bring request error durante upload: {e}")
+        return 0
+    except Exception as e:
+        logger.error(f"❌ Errore upload_to_bring: {e}")
+        return 0
 
 # ============================================================
 # OTTIENI IL PERCORSO DELLO SCRIPT
@@ -100,6 +548,7 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
         [InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start")],
         [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
         [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
+        [InlineKeyboardButton("🛒 LISTA DELLA SPESA", callback_data="lista_spesa_start")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
@@ -321,6 +770,23 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         nome_settimana = data.replace("elimina_settimana_", "")
         await elimina_settimana_salvata(query, update.effective_user.id, nome_settimana)
     
+    # Check obiettivo
+    elif data.startswith("check_obiettivo_"):
+        nome_settimana = data.replace("check_obiettivo_", "")
+        await check_obiettivo_settimana(query, update.effective_user.id, nome_settimana)
+    
+    # Menu per eliminare giorno
+    elif data.startswith("elimina_giorno_menu_"):
+        nome_settimana = data.replace("elimina_giorno_menu_", "")
+        await mostra_menu_elimina_giorno(query, update.effective_user.id, nome_settimana)
+    
+    # Elimina un giorno specifico
+    elif data.startswith("elimina_giorno_"):
+        parts = data.replace("elimina_giorno_", "").split("#")
+        nome_settimana = parts[0]
+        giorno_idx = int(parts[1])
+        await elimina_giorno_da_settimana(query, update.effective_user.id, nome_settimana, giorno_idx)
+    
     # Visualizza una settimana salvata
     elif data.startswith("visualizza_settimana_"):
         nome_settimana = data.replace("visualizza_settimana_", "")
@@ -341,7 +807,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         stagione = parts[0]
         settimana_num = parts[1]
         giorno_idx = int(parts[2])
-        await aggiungi_giorno_a_settimana_start(query, update.effective_user.id, stagione, settimana_num, giorno_idx)
+        await aggiungi_giorno_a_settimana_start(query, update.effective_user.id, stagione, settimana_num, giorno_idx, context)
     
     # Selezione categoria per creare settimana
     elif data.startswith("seleziona_cat_"):
@@ -411,6 +877,117 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         giorno_idx = int(giorno_parts[2])
         slot_idx = int(parts[2])
         await add_day_to_week_slot(query, context, nome_settimana, stagione, settimana_num, giorno_idx, slot_idx)
+    
+    # Crea nuova settimana vuota dal menu di scelta
+    elif data.startswith("create_new_empty_week#"):
+        parts = data.replace("create_new_empty_week#", "").split("_")
+        stagione = parts[0]
+        settimana_num = parts[1]
+        giorno_idx = int(parts[2])
+        context.user_data['creating_empty_week'] = True
+        context.user_data['pending_add_to_week'] = f"{stagione}_{settimana_num}_{giorno_idx}"
+        await query.edit_message_text(
+            "📝 *Scrivi il nome della nuova settimana:*\n\n"
+            "(es: 'Pippo', 'La mia', 'Estiva', ecc.)",
+            parse_mode="Markdown"
+        )
+    
+    # Lista della spesa - inizio flusso
+    elif data == "lista_spesa_start":
+        await mostra_liste_spesa_utente(query, update.effective_user.id)
+    
+    # Lista della spesa - scegli stagione
+    elif data.startswith("crea_lista_spesa_"):
+        stagione = data.replace("crea_lista_spesa_", "")
+        await mostra_settimane_per_lista(query, update.effective_user.id, stagione)
+    
+    # Lista della spesa - salva lista (clic su settimana)
+    elif data.startswith("salva_lista_spesa_"):
+        parts = data.replace("salva_lista_spesa_", "").split("_")
+        stagione = parts[0]
+        settimana_num = int(parts[1])
+        await salva_lista_spesa_da_settimana(query, update.effective_user.id, stagione, settimana_num, context)
+    
+    # Lista della spesa - toggle ingrediente
+    elif data.startswith("toggle_lista_ing_"):
+        parts = data.replace("toggle_lista_ing_", "").split("_")
+        nome_lista = parts[0]
+        ing_idx = int(parts[1])
+        await toggle_ingrediente_lista(query, update.effective_user.id, nome_lista, ing_idx, context)
+    
+    # Lista della spesa - visualizza lista salvata
+    elif data.startswith("visualizza_lista_spesa_"):
+        nome_lista = data.replace("visualizza_lista_spesa_", "")
+        await visualizza_lista_spesa(query, update.effective_user.id, nome_lista)
+    
+    # Lista della spesa - elimina lista
+    elif data.startswith("elimina_lista_spesa_"):
+        nome_lista = data.replace("elimina_lista_spesa_", "")
+        delete_lista_spesa(update.effective_user.id, nome_lista)
+        await query.answer(f"✅ Lista '{nome_lista}' eliminata!", show_alert=True)
+        await mostra_liste_spesa_utente(query, update.effective_user.id)
+    
+    # Lista della spesa - scegli da settimana salvata
+    elif data == "lista_spesa_da_salvata":
+        await mostra_settimane_salvate_per_lista(query, update.effective_user.id)
+    
+    # Lista della spesa - crea da settimana salvata
+    elif data.startswith("lista_spesa_da_salvata_"):
+        nome_settimana = data.replace("lista_spesa_da_salvata_", "")
+        await salva_lista_spesa_da_settimana_salvata(query, update.effective_user.id, nome_settimana, context)
+    
+    # Bring - inizio flusso
+    elif data == "bring_start":
+        nome_lista = context.user_data.get('current_lista_spesa')
+        if not nome_lista:
+            await query.answer("❌ Errore: lista non trovata", show_alert=True)
+            return
+        
+        ingredienti = context.user_data.get(f'lista_ingredienti_{nome_lista}', [])
+        if not ingredienti:
+            dati_lista = get_lista_spesa(update.effective_user.id, nome_lista)
+            if dati_lista:
+                ingredienti = [ing_data['nome'] for ing_data in dati_lista.get('ingredienti', {}).values()]
+        
+        credenziali = get_bring_credentials(update.effective_user.id)
+        if credenziali:
+            await mostra_liste_bring(query, update.effective_user.id, nome_lista, ingredienti, context)
+        else:
+            context.user_data['bring_nome_lista'] = nome_lista
+            context.user_data['bring_ingredienti'] = ingredienti
+            context.user_data['in_bring_email'] = True
+            await query.edit_message_text(
+                "📧 *Dimmi la tua email Bring:*\n\n"
+                "(Puoi crearla su https://web.getbring.com)",
+                parse_mode="Markdown"
+            )
+    
+    # Bring - seleziona lista per upload
+    elif data.startswith("bring_upload_"):
+        lista_uuid = data.replace("bring_upload_", "")
+        nome_lista = context.user_data.get('bring_nome_lista')
+        ingredienti = context.user_data.get('bring_ingredienti', [])
+        email = context.user_data.get('bring_email')
+        password = context.user_data.get('bring_password')
+        
+        if email and password and nome_lista:
+            await query.edit_message_text("⏳ *Caricamento ingredienti su Bring...*", parse_mode="Markdown")
+            items_added = await upload_to_bring(email, password, lista_uuid, ingredienti)
+            
+            if items_added > 0:
+                lista_name = context.user_data.get('bring_lista_name_target', 'Bring')
+                save_bring_credentials(update.effective_user.id, email, password, lista_uuid, lista_name)
+                await query.edit_message_text(
+                    f"✅ *Caricati {items_added}/{len(ingredienti)} ingredienti su Bring!*\n\n"
+                    f"📱 Apri l'app Bring per completare gli acquisti",
+                    parse_mode="Markdown",
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🏠 HOME", callback_data="home")]])
+                )
+            else:
+                await query.edit_message_text(
+                    "❌ Errore nel caricamento. Controlla credenziali Bring.",
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🏠 HOME", callback_data="home")]])
+                )
 
 async def mostra_menu_principale(query):
     """Mostra il menu principale"""
@@ -428,6 +1005,7 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
         [InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start")],
         [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
         [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
+        [InlineKeyboardButton("🛒 LISTA DELLA SPESA", callback_data="lista_spesa_start")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
@@ -914,17 +1492,7 @@ Puoi visualizzarla in "LE MIE SETTIMANE"
 
 async def mostra_mie_settimane(query, user_id):
     """Mostra le settimane salvate dall'utente"""
-    try:
-        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
-            settimane_salvate = json.load(f)
-    except FileNotFoundError:
-        text = "📁 LE MIE SETTIMANE\n\n❌ Non hai ancora salvato nessuna settimana!"
-        keyboard = [[InlineKeyboardButton("🏠 HOME", callback_data="home")]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text(text, reply_markup=reply_markup)
-        return
-    
-    utente_settimane = settimane_salvate.get(str(user_id), {})
+    utente_settimane = get_settimane_utente(user_id)
     
     if not utente_settimane:
         text = "📁 LE MIE SETTIMANE\n\n❌ Non hai ancora salvato nessuna settimana!"
@@ -937,8 +1505,7 @@ async def mostra_mie_settimane(query, user_id):
     keyboard = []
     
     for idx, (nome_settimana, dati) in enumerate(utente_settimane.items()):
-        data_creazione = dati.get('data_creazione', 'N/A')
-        text += f"{idx + 1}. {nome_settimana}\n   ({data_creazione})\n\n"
+        text += f"{idx + 1}. {nome_settimana}\n\n"
         keyboard.append([InlineKeyboardButton(f"📖 Visualizza: {nome_settimana}", callback_data=f"visualizza_settimana_{nome_settimana}")])
     
     keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
@@ -948,30 +1515,19 @@ async def mostra_mie_settimane(query, user_id):
 
 async def visualizza_settimana_salvata(query, user_id, nome_settimana):
     """Visualizza una settimana salvata con bottoni per i giorni"""
-    try:
-        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
-            settimane_salvate = json.load(f)
-    except FileNotFoundError:
-        await query.edit_message_text("❌ File settimane non trovato!")
-        return
-    except Exception as e:
-        await query.edit_message_text(f"❌ Errore lettura file: {str(e)}")
-        return
-    
-    dati_settimana = settimane_salvate.get(str(user_id), {}).get(nome_settimana)
+    dati_settimana = get_settimana(user_id, nome_settimana)
     
     if not dati_settimana:
         await query.edit_message_text(f"❌ Settimana '{nome_settimana}' non trovata!")
         return
     
     settimana = dati_settimana.get('settimana', {})
-    data_creazione = dati_settimana.get('data_creazione', 'N/A')
     
     if not settimana:
         await query.edit_message_text("❌ Dati settimana non validi!")
         return
     
-    text = f"📖 *{nome_settimana}*\n\nData creazione: {data_creazione}\n\n*Scegli un giorno:*"
+    text = f"📖 *{nome_settimana}*\n\n*Scegli un giorno:*"
     
     keyboard = []
     
@@ -986,7 +1542,9 @@ async def visualizza_settimana_salvata(query, user_id, nome_settimana):
             callback_data=f"visualizza_giorno_salvato_{nome_settimana}#{idx}"
         )])
     
-    keyboard.append([InlineKeyboardButton("🗑️ ELIMINA", callback_data=f"elimina_settimana_{nome_settimana}")])
+    keyboard.append([InlineKeyboardButton("🗑️ ELIMINA SETTIMANA", callback_data=f"elimina_settimana_{nome_settimana}")])
+    keyboard.append([InlineKeyboardButton("🗑️ ELIMINA GIORNO", callback_data=f"elimina_giorno_menu_{nome_settimana}")])
+    keyboard.append([InlineKeyboardButton("✅ CHECK OBIETTIVO", callback_data=f"check_obiettivo_{nome_settimana}")])
     keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="mie_settimane_start")])
     keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
     
@@ -1015,43 +1573,30 @@ async def elimina_settimana_salvata(query, user_id, nome_settimana):
 
 async def visualizza_giorno_settimana_salvata(query, user_id, nome_settimana, giorno_idx):
     """Visualizza un giorno specifico di una settimana salvata"""
-    try:
-        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
-            settimane_salvate = json.load(f)
-    except FileNotFoundError:
-        await query.edit_message_text("❌ File settimane non trovato!")
+    dati_settimana = get_settimana(user_id, nome_settimana)
+    
+    if not dati_settimana:
+        await query.edit_message_text("❌ Settimana non trovata!")
         return
     
-    settimana = settimane_salvate.get(str(user_id), {}).get(nome_settimana, {}).get('settimana', {})
+    settimana = dati_settimana.get('settimana', {})
     giorno_data = settimana.get(str(giorno_idx))
     
     if not giorno_data:
-        # Debug: mostra le chiavi disponibili
-        chiavi = list(settimana.keys())
-        await query.edit_message_text(f"❌ Giorno non trovato!\nChiavi disponibili: {chiavi}\nRicercando: {str(giorno_idx)}")
+        await query.edit_message_text(f"❌ Giorno non trovato!")
         return
     
     giorno_num = int(giorno_idx) + 1
     giorno_nome = giorno_data.get('giorno', 'Sconosciuto')
-    stagione = giorno_data.get('stagione', 'Sconosciuta')
-    settimana_nome = giorno_data.get('settimana', 'Sconosciuta')
     
     text = f"📅 <b>Giorno {giorno_num}: {giorno_nome}</b>\n\n"
-    text += f"({stagione} - {settimana_nome})\n\n"
     
-    # Mostra i pasti del giorno
-    for pasto, descrizione in giorno_data.items():
-        if pasto not in ['giorno', 'stagione', 'settimana', 'menu']:
+    # Mostra il menu
+    menu = giorno_data.get('menu', {})
+    if menu:
+        for pasto, descrizione in menu.items():
             if isinstance(descrizione, str):
                 text += f"<b>{pasto.upper()}</b>\n{descrizione}\n\n"
-    
-    # Se non hai trovato pasti personali, mostra il menu
-    if not any(k not in ['giorno', 'stagione', 'settimana', 'menu'] for k in giorno_data.keys()):
-        menu = giorno_data.get('menu', {})
-        if menu:
-            for pasto, descrizione in menu.items():
-                if isinstance(descrizione, str):
-                    text += f"<b>{pasto.upper()}</b>\n{descrizione}\n\n"
     
     keyboard = [
         [InlineKeyboardButton("⬅️ Indietro", callback_data=f"visualizza_settimana_{nome_settimana}")],
@@ -1062,8 +1607,35 @@ async def visualizza_giorno_settimana_salvata(query, user_id, nome_settimana, gi
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="HTML")
 
 async def salva_settimana_con_nome_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Wrapper per gestire il salvataggio o ricerca ingrediente"""
-    if context.user_data.get('in_salvataggio'):
+    """Wrapper per gestire il salvataggio, ricerca ingrediente, creazione settimana vuota, o credenziali Bring"""
+    if context.user_data.get('in_bring_email'):
+        context.user_data['bring_email'] = update.message.text.strip()
+        context.user_data['in_bring_email'] = False
+        context.user_data['in_bring_password'] = True
+        await update.message.reply_text("🔐 *Ora la password:*", parse_mode="Markdown")
+    elif context.user_data.get('in_bring_password'):
+        context.user_data['bring_password'] = update.message.text.strip()
+        context.user_data['in_bring_password'] = False
+        
+        email = context.user_data.get('bring_email')
+        password = context.user_data.get('bring_password')
+        nome_lista = context.user_data.get('bring_nome_lista')
+        ingredienti = context.user_data.get('bring_ingredienti', [])
+        
+        await update.message.reply_text("⏳ *Verifico credenziali Bring...*", parse_mode="Markdown")
+        bring_lists = await fetch_bring_lists(email, password)
+        
+        if bring_lists:
+            await mostra_liste_bring_da_message(update, context, email, password, nome_lista, ingredienti, bring_lists)
+        else:
+            await update.message.reply_text(
+                "❌ *Credenziali errate!*\n\nRiprova con una nuova email.",
+                parse_mode="Markdown"
+            )
+            context.user_data['in_bring_email'] = True
+    elif context.user_data.get('creating_empty_week'):
+        await crea_settimana_vuota(update, context)
+    elif context.user_data.get('in_salvataggio'):
         await salva_settimana_con_nome(update, context)
     else:
         await cerca_ingrediente(update, context)
@@ -1072,33 +1644,24 @@ async def salva_settimana_con_nome_wrapper(update: Update, context: ContextTypes
 # AGGIUNGI GIORNO A SETTIMANA
 # ============================================================
 
-async def aggiungi_giorno_a_settimana_start(query, user_id, stagione, settimana_num, giorno_idx):
+async def aggiungi_giorno_a_settimana_start(query, user_id, stagione, settimana_num, giorno_idx, context):
     """Mostra la lista delle settimane salvate per aggiungere il giorno"""
-    # Carica le settimane salvate dell'utente
-    try:
-        with open(SCRIPT_DIR / 'settimane_utenti.json', 'r', encoding='utf-8') as f:
-            settimane_utenti = json.load(f)
-    except FileNotFoundError:
-        await query.answer("❌ Nessuna settimana salvata ancora!", show_alert=True)
-        return
+    # Carica le settimane salvate dell'utente dal database
+    user_settimane = get_settimane_utente(user_id)
     
-    user_settimane = settimane_utenti.get(str(user_id), {})
     if not user_settimane:
-        await query.answer("❌ Nessuna settimana salvata ancora!", show_alert=True)
+        text = "❌ *Non hai ancora settimane salvate!*\n\nDevi prima creare una settimana.\n\nScrivi il nome della nuova settimana (es: 'Mia Settimana', 'Pippo', ecc.)"
+        keyboard = [[InlineKeyboardButton("🏠 HOME", callback_data="home")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+        context.user_data['creating_empty_week'] = True
+        context.user_data['pending_add_to_week'] = f"{stagione}_{settimana_num}_{giorno_idx}"
         return
     
     # Salva il giorno selezionato in context
     giorno = GIORNI[giorno_idx]
     settimana = f"SETTIMANA_{settimana_num}"
     menu_giorno = MENU[stagione][settimana][giorno]
-    
-    # Crea la struttura del giorno per il salvataggio
-    giorno_data = {
-        "stagione": stagione,
-        "settimana": settimana,
-        "giorno": giorno,
-        "menu": menu_giorno
-    }
     
     text = f"*Aggiungi a quale settimana?*\n\nGiorno selezionato: {stagione} - {giorno}\n\n"
     keyboard = []
@@ -1107,6 +1670,7 @@ async def aggiungi_giorno_a_settimana_start(query, user_id, stagione, settimana_
         keyboard.append([InlineKeyboardButton(nome_settimana, 
                                              callback_data=f"select_dest_week_{nome_settimana}#{stagione}_{settimana_num}_{giorno_idx}")])
     
+    keyboard.append([InlineKeyboardButton("➕ Crea nuova settimana", callback_data=f"create_new_empty_week#{stagione}_{settimana_num}_{giorno_idx}")])
     keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data=f"back_settimane_{stagione}")])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1116,25 +1680,26 @@ async def select_dest_week(query, context, nome_settimana, stagione, settimana_n
     """Mostra lo stato della settimana di destinazione con gli slot vuoti"""
     user_id = query.from_user.id
     
-    # Carica le settimane salvate
-    try:
-        with open(SCRIPT_DIR / 'settimane_utenti.json', 'r', encoding='utf-8') as f:
-            settimane_utenti = json.load(f)
-    except FileNotFoundError:
-        await query.answer("❌ Errore nel caricamento!", show_alert=True)
-        return
-    
-    user_settimane = settimane_utenti.get(str(user_id), {})
-    settimana_dest = user_settimane.get(nome_settimana, {})
+    # Carica le settimane salvate dal database
+    user_settimane = get_settimane_utente(user_id)
+    settimana_dest_data = user_settimane.get(nome_settimana, {})
+    settimana_dest = settimana_dest_data.get('settimana', {})
     
     # Mostra lo stato della settimana con slot vuoti e pieni
     text = f"*Settimana: {nome_settimana}*\n\n"
     text += f"*Aggiungi il giorno:* {GIORNI[giorno_idx]}\n\n"
     
+    # Mappa i giorni della settimana salvata
+    giorni_occupati = set()
+    for idx, giorno_data in settimana_dest.items():
+        giorno_nome = giorno_data.get('giorno', '')
+        if giorno_nome:
+            giorni_occupati.add(giorno_nome)
+    
     for i, giorno in enumerate(GIORNI):
-        if giorno in settimana_dest:
+        if giorno in giorni_occupati:
             emoji = "✅"
-            text += f"{emoji} *{giorno}*: {list(settimana_dest[giorno].values())[0] if isinstance(settimana_dest[giorno], dict) else settimana_dest[giorno]}\n"
+            text += f"{emoji} *{giorno}*: riempito\n"
         else:
             emoji = "⬜"
             text += f"{emoji} *{giorno}*: vuoto\n"
@@ -1143,7 +1708,7 @@ async def select_dest_week(query, context, nome_settimana, stagione, settimana_n
     # Mostra i pulsanti solo per gli slot vuoti
     row = []
     for i, giorno in enumerate(GIORNI):
-        if giorno not in settimana_dest:
+        if giorno not in giorni_occupati:
             row.append(InlineKeyboardButton(f"➕ {giorno}", 
                                            callback_data=f"add_day_slot_{nome_settimana}#{stagione}_{settimana_num}_{giorno_idx}#{i}"))
             if len(row) == 2:
@@ -1161,13 +1726,8 @@ async def add_day_to_week_slot(query, context, nome_settimana, stagione, settima
     """Aggiunge il giorno allo slot scelto della settimana"""
     user_id = query.from_user.id
     
-    try:
-        with open(SCRIPT_DIR / 'settimane_utenti.json', 'r', encoding='utf-8') as f:
-            settimane_utenti = json.load(f)
-    except FileNotFoundError:
-        settimane_utenti = {}
-    
-    user_settimane = settimane_utenti.get(str(user_id), {})
+    # Carica le settimane dal database
+    user_settimane = get_settimane_utente(user_id)
     
     # Ottieni il giorno da aggiungere
     giorno_source = GIORNI[giorno_idx]
@@ -1179,19 +1739,625 @@ async def add_day_to_week_slot(query, context, nome_settimana, stagione, settima
     
     # Aggiungi il giorno alla settimana di destinazione
     if nome_settimana not in user_settimane:
-        user_settimane[nome_settimana] = {}
+        user_settimane[nome_settimana] = {'settimana': {}, 'data_creazione': 'N/A'}
     
-    user_settimane[nome_settimana][giorno_dest] = menu_giorno
-    settimane_utenti[str(user_id)] = user_settimane
+    settimana_dest = user_settimane[nome_settimana].get('settimana', {})
+    settimana_dest[str(slot_idx)] = {
+        'giorno': giorno_dest,
+        'menu': menu_giorno
+    }
     
-    # Salva
-    with open(SCRIPT_DIR / 'settimane_utenti.json', 'w', encoding='utf-8') as f:
-        json.dump(settimane_utenti, f, ensure_ascii=False, indent=2)
+    # Salva nel database
+    save_settimana(user_id, nome_settimana, settimana_dest)
     
     await query.answer(f"✅ {giorno_source} aggiunto a {nome_settimana} come {giorno_dest}!", show_alert=True)
     
     # Mostra di nuovo la settimana
     await select_dest_week(query, context, nome_settimana, stagione, settimana_num, giorno_idx)
+
+async def crea_settimana_vuota(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Crea una nuova settimana vuota con il nome inserito"""
+    user_id = update.effective_user.id
+    nome_settimana = update.message.text.strip()
+    
+    if not nome_settimana or len(nome_settimana) < 2:
+        await update.message.reply_text("❌ Il nome deve avere almeno 2 caratteri!")
+        return
+    
+    # Carica le settimane dal database
+    user_settimane = get_settimane_utente(user_id)
+    
+    # Verifica se esiste già
+    if nome_settimana in user_settimane:
+        await update.message.reply_text(f"⚠️ La settimana '{nome_settimana}' esiste già!")
+        return
+    
+    # Crea la nuova settimana vuota nel database
+    save_settimana(user_id, nome_settimana, {})
+    
+    # Se è stato chiamato dal flusso "aggiungi a settimana", torna a quel flusso
+    if 'pending_add_to_week' in context.user_data:
+        parts = context.user_data['pending_add_to_week'].split('_')
+        stagione = parts[0]
+        settimana_num = parts[1]
+        giorno_idx = int(parts[2])
+        
+        # Pulisci il context
+        context.user_data['creating_empty_week'] = False
+        context.user_data.pop('pending_add_to_week', None)
+        
+        # Crea un oggetto query finto per poter usare select_dest_week
+        class FakeQuery:
+            def __init__(self, message):
+                self.from_user = message.from_user
+            
+            async def edit_message_text(self, text, reply_markup=None, parse_mode=None):
+                await update.message.reply_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
+        
+        fake_query = FakeQuery(update.message)
+        await select_dest_week(fake_query, context, nome_settimana, stagione, settimana_num, giorno_idx)
+    else:
+        # Se era la prima creazione, torna al menu principale
+        context.user_data['creating_empty_week'] = False
+        await update.message.reply_text("✅ Settimana creata!")
+
+async def check_obiettivo_settimana(query, user_id, nome_settimana):
+    """Controlla se la settimana rispetta gli obiettivi settimanali"""
+    # Obiettivi settimanali
+    OBIETTIVI = {
+        'pesce': 3,
+        'uova': 4,
+        'legumi': 5,
+        'carne bianca': 1,
+        'formaggi': (1, 2)  # range 1-2
+    }
+    
+    # Carica ingredienti per categorizzazione
+    try:
+        with open(SCRIPT_DIR / 'ingredienti_definitivi.json', 'r', encoding='utf-8') as f:
+            ingredienti_db = json.load(f)
+    except FileNotFoundError:
+        await query.answer("❌ File ingredienti non trovato!", show_alert=True)
+        return
+    
+    # Carica settimana dal database
+    dati_settimana = get_settimana(user_id, nome_settimana)
+    
+    if not dati_settimana:
+        await query.answer("❌ Settimana non trovata!", show_alert=True)
+        return
+    
+    settimana = dati_settimana.get('settimana', {})
+    
+    if not settimana:
+        await query.answer("❌ Settimana vuota!", show_alert=True)
+        return
+    
+    # Raccogli tutti i piatti della settimana in minuscolo
+    testo_settimana = ""
+    for idx, giorno_data in settimana.items():
+        menu = giorno_data.get('menu', {})
+        if menu:
+            for pasto, descrizione in menu.items():
+                if isinstance(descrizione, str):
+                    testo_settimana += descrizione.lower() + " "
+    
+    # Conta occorrenze e traccia ingredienti trovati
+    conteggi = {
+        'pesce': 0,
+        'uova': 0,
+        'legumi': 0,
+        'carne bianca': 0,
+        'formaggi': 0
+    }
+    
+    ingredienti_trovati = {
+        'pesce': [],
+        'uova': [],
+        'legumi': [],
+        'carne bianca': [],
+        'formaggi': []
+    }
+    
+    # Conta per pesce (PROTEINE che contengono pesce)
+    pesce_items = ['Salmone', 'Branzino', 'Merluzzo', 'Nasello', 'Orata', 'Pesce', 'Pesce spada', 
+                   'Polipo', 'Rombo', 'Sardine', 'Sgombro', 'Sogliola', 'Spigola', 'Tonno', 'Trota', 'Acciughe', 'Cernia', 'Dentice']
+    for ing in pesce_items:
+        count = testo_settimana.count(ing.lower())
+        if count > 0:
+            conteggi['pesce'] += count
+            ingredienti_trovati['pesce'].append(f"{ing} ({count}x)")
+    
+    # Conta per uova (PROTEINE - uova)
+    for keyword in ['uova', 'frittata']:
+        count = testo_settimana.count(keyword)
+        if count > 0:
+            conteggi['uova'] += count
+            ingredienti_trovati['uova'].append(f"{keyword.capitalize()} ({count}x)")
+    
+    # Conta per legumi (CARBOIDRATI - legumi)
+    legumi_items = ['Ceci', 'Fagioli', 'Lenticchie']
+    for ing in legumi_items:
+        count = testo_settimana.count(ing.lower())
+        if count > 0:
+            conteggi['legumi'] += count
+            ingredienti_trovati['legumi'].append(f"{ing} ({count}x)")
+    
+    # Conta per carne bianca (PROTEINE - pollo, tacchino, coniglio)
+    carne_bianca_items = ['Pollo', 'Tacchino', 'Coniglio']
+    for ing in carne_bianca_items:
+        count = testo_settimana.count(ing.lower())
+        if count > 0:
+            conteggi['carne bianca'] += count
+            ingredienti_trovati['carne bianca'].append(f"{ing} ({count}x)")
+    
+    # Conta per formaggi (LATTICINI)
+    for ing in ingredienti_db.get('🧀 LATTICINI', []):
+        count = testo_settimana.count(ing.lower())
+        if count > 0:
+            conteggi['formaggi'] += count
+            ingredienti_trovati['formaggi'].append(f"{ing} ({count}x)")
+    
+    # Genera report
+    text = f"📊 *REPORT OBIETTIVI - {nome_settimana}*\n\n"
+    
+    for categoria, target in OBIETTIVI.items():
+        conteggio = conteggi[categoria]
+        trovati = ingredienti_trovati[categoria]
+        
+        if isinstance(target, tuple):
+            # Range (es: formaggi 1-2)
+            min_target, max_target = target
+            if min_target <= conteggio <= max_target:
+                emoji = "✅"
+                status = f"{conteggio} ({min_target}-{max_target})"
+            else:
+                emoji = "❌"
+                status = f"{conteggio} ({min_target}-{max_target})"
+        else:
+            # Valore fisso
+            if conteggio >= target:
+                emoji = "✅"
+            else:
+                emoji = "❌"
+            status = f"{conteggio}/{target}"
+        
+        text += f"{emoji} *{categoria.upper()}*: {status}\n"
+        if trovati:
+            text += f"   {', '.join(trovati)}\n"
+        text += "\n"
+    
+    keyboard = [[InlineKeyboardButton("⬅️ Indietro", callback_data=f"visualizza_settimana_{nome_settimana}")],
+               [InlineKeyboardButton("🏠 HOME", callback_data="home")]]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def mostra_menu_elimina_giorno(query, user_id, nome_settimana):
+    """Mostra il menu per scegliere quale giorno eliminare"""
+    dati_settimana = get_settimana(user_id, nome_settimana)
+    
+    if not dati_settimana:
+        await query.answer("❌ Settimana non trovata!", show_alert=True)
+        return
+    
+    settimana = dati_settimana.get('settimana', {})
+    
+    if not settimana:
+        await query.answer("❌ Settimana vuota!", show_alert=True)
+        return
+    
+    text = f"*Elimina quale giorno?*\n\n"
+    keyboard = []
+    
+    for idx in sorted([int(i) for i in settimana.keys()]):
+        giorno_data = settimana[str(idx)]
+        giorno_nome = giorno_data.get('giorno', 'Giorno sconosciuto')
+        
+        keyboard.append([InlineKeyboardButton(
+            f"🗑️ {giorno_nome}",
+            callback_data=f"elimina_giorno_{nome_settimana}#{idx}"
+        )])
+    
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data=f"visualizza_settimana_{nome_settimana}")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def elimina_giorno_da_settimana(query, user_id, nome_settimana, giorno_idx):
+    """Elimina un giorno specifico dalla settimana"""
+    dati_settimana = get_settimana(user_id, nome_settimana)
+    
+    if not dati_settimana:
+        await query.answer("❌ Settimana non trovata!", show_alert=True)
+        return
+    
+    settimana = dati_settimana.get('settimana', {})
+    
+    if str(giorno_idx) not in settimana:
+        await query.answer("❌ Giorno non trovato!", show_alert=True)
+        return
+    
+    # Ottieni il nome del giorno da eliminare
+    giorno_nome = settimana[str(giorno_idx)].get('giorno', 'Giorno')
+    
+    # Elimina il giorno
+    del settimana[str(giorno_idx)]
+    
+    # Salva nel database
+    save_settimana(user_id, nome_settimana, settimana)
+    
+    await query.answer(f"✅ {giorno_nome} eliminato!", show_alert=True)
+    
+    # Torna al menu della settimana
+    await visualizza_settimana_salvata(query, user_id, nome_settimana)
+
+# ============================================================
+# LISTA DELLA SPESA
+# ============================================================
+
+async def mostra_liste_spesa_utente(query, user_id):
+    """Mostra il menu principale della lista della spesa"""
+    liste_salvate = get_liste_spesa_utente(user_id)
+    
+    text = "🛒 *LISTA DELLA SPESA*\n\n"
+    keyboard = []
+    
+    if liste_salvate:
+        text += "*Tue liste salvate:*\n\n"
+        for nome_lista in sorted(liste_salvate.keys()):
+            keyboard.append([InlineKeyboardButton(f"📋 {nome_lista}", callback_data=f"visualizza_lista_spesa_{nome_lista}")])
+        text += f"Hai {len(liste_salvate)} list{'a' if len(liste_salvate) == 1 else 'e'} salvata{'e' if len(liste_salvate) != 1 else ''}.\n\n"
+    else:
+        text += "Non hai ancora liste della spesa.\n\n"
+    
+    text += "*Crea una nuova lista da settimane predefinite:*\n"
+    keyboard.append([InlineKeyboardButton("☀️ ESTATE", callback_data="crea_lista_spesa_ESTATE")])
+    keyboard.append([InlineKeyboardButton("🌱 PRIMAVERA", callback_data="crea_lista_spesa_PRIMAVERA")])
+    keyboard.append([InlineKeyboardButton("❄️ INVERNO", callback_data="crea_lista_spesa_INVERNO")])
+    
+    text += "\n*Oppure da settimane salvate:*\n"
+    keyboard.append([InlineKeyboardButton("📁 Da settimana salvata", callback_data="lista_spesa_da_salvata")])
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def mostra_settimane_per_lista(query, user_id, stagione):
+    """Mostra le settimane della stagione per creare lista"""
+    text = f"*Scegli una settimana da {stagione}:*\n\n"
+    keyboard = []
+    
+    settimane_disponibili = MENU.get(stagione, {})
+    for settimana_key in sorted(settimane_disponibili.keys()):
+        settimana_num = settimana_key.split("_")[1]
+        keyboard.append([InlineKeyboardButton(f"Settimana {settimana_num}", callback_data=f"salva_lista_spesa_{stagione}_{settimana_num}")])
+    
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="lista_spesa_start")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def salva_lista_spesa_da_settimana(query, user_id, stagione, settimana_num, context):
+    """Estrae ingredienti intelligenti da una settimana e crea una lista categorizzata"""
+    settimana_key = f"SETTIMANA_{settimana_num}"
+    settimana_data = MENU.get(stagione, {}).get(settimana_key, {})
+    
+    if not settimana_data:
+        await query.answer("❌ Settimana non trovata!", show_alert=True)
+        return
+    
+    # Carica ingredienti da categorizzare
+    try:
+        with open(SCRIPT_DIR / 'ingredienti_definitivi.json', 'r', encoding='utf-8') as f:
+            ingredienti_db = json.load(f)
+    except FileNotFoundError:
+        await query.answer("❌ File ingredienti non trovato!", show_alert=True)
+        return
+    
+    # Crea mappa di ingredienti per ricerca veloce (categoria → lista ingredienti lowercase)
+    ingredienti_map = {}
+    for categoria, items in ingredienti_db.items():
+        for item in items:
+            ingredienti_map[item.lower()] = categoria
+    
+    # Estrai ingredienti dalla settimana
+    ingredienti_contati = {}  # {categoria: {ingrediente: count}}
+    
+    for giorno in GIORNI:
+        menu_giorno = settimana_data.get(giorno, {})
+        for pasto, descrizione in menu_giorno.items():
+            if isinstance(descrizione, str):
+                # Splitti intelligente: per virgole e "con"
+                componenti = descrizione.lower().replace(' con ', ',').replace(' e ', ',').split(',')
+                
+                for componente in componenti:
+                    componente = componente.strip()
+                    
+                    # Cerca ingredienti noti in questo componente
+                    # Ordina per lunghezza decrescente per evitare match parziali
+                    ingredienti_ordinati = sorted(ingredienti_map.keys(), key=len, reverse=True)
+                    
+                    for ingrediente_nome in ingredienti_ordinati:
+                        # Match esatto di parola (non substring)
+                        if ingrediente_nome in componente:
+                            categoria = ingredienti_map[ingrediente_nome]
+                            
+                            if categoria not in ingredienti_contati:
+                                ingredienti_contati[categoria] = {}
+                            
+                            # Capitalizza per display
+                            ing_display = next(
+                                (item for item in ingredienti_db[categoria] if item.lower() == ingrediente_nome),
+                                ingrediente_nome.capitalize()
+                            )
+                            
+                            if ing_display not in ingredienti_contati[categoria]:
+                                ingredienti_contati[categoria][ing_display] = 0
+                            ingredienti_contati[categoria][ing_display] += 1
+                            break  # Prendi il primo match in questo componente
+    
+    # Costruisci dict finale con categoria e conteggio
+    ingredienti_dict = {}
+    idx = 0
+    for categoria in sorted(ingredienti_contati.keys()):
+        for ingrediente, count in sorted(ingredienti_contati[categoria].items()):
+            display = f"{ingrediente} (x{count})" if count > 1 else ingrediente
+            ingredienti_dict[idx] = {
+                'nome': display,
+                'categoria': categoria,
+                'spuntato': False
+            }
+            idx += 1
+    
+    # Salva con nome auto-generato
+    nome_lista = f"{stagione} S{settimana_num}"
+    save_lista_spesa(user_id, nome_lista, stagione, settimana_num, ingredienti_dict)
+    
+    # Salva ingredienti in context per eventuale upload su Bring
+    ingredienti_lista = [ing_data['nome'] for ing_data in ingredienti_dict.values()]
+    context.user_data[f'lista_ingredienti_{nome_lista}'] = ingredienti_lista
+    
+    await query.answer(f"✅ Lista '{nome_lista}' creata con {len(ingredienti_dict)} ingredienti!", show_alert=True)
+    await visualizza_lista_spesa(query, user_id, nome_lista)
+
+async def visualizza_lista_spesa(query, user_id, nome_lista, context=None):
+    """Visualizza una lista della spesa categorizzata con checkbox deflaggabili"""
+    dati_lista = get_lista_spesa(user_id, nome_lista)
+    
+    # Salva nome_lista in context per Bring
+    if context:
+        context.user_data['current_lista_spesa'] = nome_lista
+    
+    if not dati_lista:
+        await query.answer("❌ Lista non trovata!", show_alert=True)
+        return
+    
+    ingredienti = dati_lista.get('ingredienti', {})
+    
+    text = f"🛒 *{nome_lista}*\n\n"
+    non_spuntati = len([i for i in ingredienti.values() if not i.get('spuntato', False)])
+    text += f"*Ingredienti ({non_spuntati}/{len(ingredienti)}):*\n\n"
+    
+    keyboard = []
+    
+    # Raggruppa per categoria
+    categorie_ordinata = {}
+    for idx, ing_data in sorted(ingredienti.items(), key=lambda x: int(x[0])):
+        categoria = ing_data.get('categoria', '❓ ALTRO')
+        if categoria not in categorie_ordinata:
+            categorie_ordinata[categoria] = []
+        categorie_ordinata[categoria].append((idx, ing_data))
+    
+    # Mostra ingredienti per categoria
+    for categoria in sorted(categorie_ordinata.keys()):
+        text += f"*{categoria}*\n"
+        for idx, ing_data in categorie_ordinata[categoria]:
+            nome = ing_data.get('nome', 'Ingrediente')
+            spuntato = ing_data.get('spuntato', False)
+            emoji = "✅" if spuntato else "⬜"
+            
+            text += f"{emoji} {nome}\n"
+            keyboard.append([InlineKeyboardButton(f"{'✅' if spuntato else '⬜'} {nome}", callback_data=f"toggle_lista_ing_{nome_lista}_{idx}")])
+        
+        text += "\n"
+    
+    keyboard.append([InlineKeyboardButton("🗑️ ELIMINA", callback_data=f"elimina_lista_spesa_{nome_lista}")])
+    keyboard.append([InlineKeyboardButton("📤 INVIA A BRING", callback_data="bring_start")])
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="lista_spesa_start")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def toggle_ingrediente_lista(query, user_id, nome_lista, ing_idx, context=None):
+    """Toggle lo stato di un ingrediente (spuntato/non spuntato)"""
+    dati_lista = get_lista_spesa(user_id, nome_lista)
+    
+    if not dati_lista:
+        await query.answer("❌ Lista non trovata!", show_alert=True)
+        return
+    
+    ingredienti = dati_lista.get('ingredienti', {})
+    ing_idx_str = str(ing_idx)
+    
+    if ing_idx_str in ingredienti:
+        ingredienti[ing_idx_str]['spuntato'] = not ingredienti[ing_idx_str].get('spuntato', False)
+        save_lista_spesa(user_id, nome_lista, dati_lista['stagione'], dati_lista['settimana_num'], ingredienti)
+    
+    await visualizza_lista_spesa(query, user_id, nome_lista, context)
+
+async def mostra_settimane_salvate_per_lista(query, user_id):
+    """Mostra le settimane salvate per crearne una lista"""
+    settimane_utente = get_settimane_utente(user_id)
+    
+    text = "*Scegli una settimana salvata:*\n\n"
+    keyboard = []
+    
+    if not settimane_utente:
+        text = "❌ Non hai ancora settimane salvate!"
+        keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="lista_spesa_start")])
+    else:
+        for nome_settimana in sorted(settimane_utente.keys()):
+            keyboard.append([InlineKeyboardButton(f"📋 {nome_settimana}", callback_data=f"lista_spesa_da_salvata_{nome_settimana}")])
+        keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="lista_spesa_start")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def salva_lista_spesa_da_settimana_salvata(query, user_id, nome_settimana, context):
+    """Estrae ingredienti dalla settimana salvata e crea una lista"""
+    dati_settimana = get_settimana(user_id, nome_settimana)
+    
+    if not dati_settimana:
+        await query.answer("❌ Settimana non trovata!", show_alert=True)
+        return
+    
+    # Carica ingredienti da categorizzare
+    try:
+        with open(SCRIPT_DIR / 'ingredienti_definitivi.json', 'r', encoding='utf-8') as f:
+            ingredienti_db = json.load(f)
+    except FileNotFoundError:
+        await query.answer("❌ File ingredienti non trovato!", show_alert=True)
+        return
+    
+    # Crea mappa di ingredienti per ricerca veloce
+    ingredienti_map = {}
+    for categoria, items in ingredienti_db.items():
+        for item in items:
+            ingredienti_map[item.lower()] = categoria
+    
+    # Estrai ingredienti dalla settimana salvata
+    ingredienti_contati = {}  # {categoria: {ingrediente: count}}
+    
+    settimana = dati_settimana.get('settimana', {})
+    for slot_idx, giorno_data in settimana.items():
+        menu = giorno_data.get('menu', {})
+        for pasto, descrizione in menu.items():
+            if isinstance(descrizione, str):
+                # Splitti intelligente: per virgole e "con"
+                componenti = descrizione.lower().replace(' con ', ',').replace(' e ', ',').split(',')
+                
+                for componente in componenti:
+                    componente = componente.strip()
+                    
+                    # Cerca ingredienti noti in questo componente
+                    ingredienti_ordinati = sorted(ingredienti_map.keys(), key=len, reverse=True)
+                    
+                    for ingrediente_nome in ingredienti_ordinati:
+                        if ingrediente_nome in componente:
+                            categoria = ingredienti_map[ingrediente_nome]
+                            
+                            if categoria not in ingredienti_contati:
+                                ingredienti_contati[categoria] = {}
+                            
+                            # Capitalizza per display
+                            ing_display = next(
+                                (item for item in ingredienti_db[categoria] if item.lower() == ingrediente_nome),
+                                ingrediente_nome.capitalize()
+                            )
+                            
+                            if ing_display not in ingredienti_contati[categoria]:
+                                ingredienti_contati[categoria][ing_display] = 0
+                            ingredienti_contati[categoria][ing_display] += 1
+                            break  # Prendi il primo match in questo componente
+    
+    # Costruisci dict finale
+    ingredienti_dict = {}
+    idx = 0
+    for categoria in sorted(ingredienti_contati.keys()):
+        for ingrediente, count in sorted(ingredienti_contati[categoria].items()):
+            display = f"{ingrediente} (x{count})" if count > 1 else ingrediente
+            ingredienti_dict[idx] = {
+                'nome': display,
+                'categoria': categoria,
+                'spuntato': False
+            }
+            idx += 1
+    
+    # Salva con nome specifico
+    nome_lista_spesa = f"Lista - {nome_settimana}"
+    save_lista_spesa(user_id, nome_lista_spesa, "SALVATA", 0, ingredienti_dict)
+    
+    # Salva ingredienti in context per eventuale upload su Bring
+    ingredienti_lista = [ing_data['nome'] for ing_data in ingredienti_dict.values()]
+    context.user_data[f'lista_ingredienti_{nome_lista_spesa}'] = ingredienti_lista
+    
+    await query.answer(f"✅ Lista '{nome_lista_spesa}' creata con {len(ingredienti_dict)} ingredienti!", show_alert=True)
+    await visualizza_lista_spesa(query, user_id, nome_lista_spesa)
+
+# ============================================================
+# BRING INTEGRATION - UI FUNCTIONS
+# ============================================================
+
+async def mostra_liste_bring(query, user_id, nome_lista, ingredienti, context):
+    """Mostra le liste Bring disponibili per upload"""
+    email = context.user_data.get('bring_email')
+    password = context.user_data.get('bring_password')
+    
+    bring_lists = await fetch_bring_lists(email, password)
+    
+    if not bring_lists:
+        await query.edit_message_text(
+            "❌ *Nessuna lista trovata su Bring*\n\n"
+            "Crea una lista su https://web.getbring.com e riprova.",
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🏠 HOME", callback_data="home")]])
+        )
+        return
+    
+    text = f"*📱 Seleziona lista Bring*\n\n"
+    text += f"Ingredienti da caricare: {len(ingredienti)}\n\n"
+    
+    keyboard = []
+    for bring_list in bring_lists:
+        keyboard.append([
+            InlineKeyboardButton(
+                f"📋 {bring_list['name']}", 
+                callback_data=f"bring_upload_{bring_list['listUuid']}"
+            )
+        ])
+    
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    await query.edit_message_text(
+        text,
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+    
+    context.user_data['bring_lista_name_target'] = bring_lists[0]['name'] if bring_lists else 'Bring'
+
+async def mostra_liste_bring_da_message(update, context, email, password, nome_lista, ingredienti, bring_lists):
+    """Mostra le liste Bring quando richiesto via message handler"""
+    if not bring_lists:
+        await update.message.reply_text(
+            "❌ *Nessuna lista trovata su Bring*\n\n"
+            "Crea una lista su https://web.getbring.com e riprova.",
+            parse_mode="Markdown"
+        )
+        return
+    
+    text = f"*📱 Seleziona lista Bring per caricamento*\n\n"
+    text += f"Ingredienti da caricare: {len(ingredienti)}\n\n"
+    
+    keyboard = []
+    for bring_list in bring_lists:
+        keyboard.append([
+            InlineKeyboardButton(
+                f"📋 {bring_list['name']}", 
+                callback_data=f"bring_upload_{bring_list['listUuid']}"
+            )
+        ])
+    
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    await update.message.reply_text(
+        text,
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+    
+    context.user_data['bring_lista_name_target'] = bring_lists[0]['name'] if bring_lists else 'Bring'
 
 # ============================================================
 # MAIN
@@ -1204,6 +2370,9 @@ def main():
     if not TOKEN:
         print("❌ ERRORE: Variabile TOKEN non trovata!")
         return
+    
+    # Inizializza il database
+    init_db()
     
     app = Application.builder().token(TOKEN).build()
     
