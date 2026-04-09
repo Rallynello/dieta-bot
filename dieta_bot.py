@@ -2027,9 +2027,11 @@ async def mostra_liste_spesa_utente(query, user_id):
         text += "Non hai ancora liste della spesa.\n\n"
     
     text += "*Crea una nuova lista da settimane predefinite:*\n"
-    keyboard.append([InlineKeyboardButton("☀️ ESTATE", callback_data="crea_lista_spesa_ESTATE")])
-    keyboard.append([InlineKeyboardButton("🌱 PRIMAVERA", callback_data="crea_lista_spesa_PRIMAVERA")])
-    keyboard.append([InlineKeyboardButton("❄️ INVERNO", callback_data="crea_lista_spesa_INVERNO")])
+    keyboard.append([
+        InlineKeyboardButton("☀️ ESTATE", callback_data="crea_lista_spesa_ESTATE"),
+        InlineKeyboardButton("🌱 PRIMAVERA", callback_data="crea_lista_spesa_PRIMAVERA"),
+        InlineKeyboardButton("❄️ INVERNO", callback_data="crea_lista_spesa_INVERNO")
+    ])
     
     text += "\n*Oppure da settimane salvate:*\n"
     keyboard.append([InlineKeyboardButton("📁 Da settimana salvata", callback_data="lista_spesa_da_salvata")])
