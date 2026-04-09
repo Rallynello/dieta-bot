@@ -1011,9 +1011,11 @@ Benvenuta, 🥗 sono il tuo assistente virtuale 🤖 🍽️
 {frase_motivazionale}
 """
     keyboard = [
-        [InlineKeyboardButton("☀️ ESTATE", callback_data="stagione_ESTATE")],
-        [InlineKeyboardButton("🌱 PRIMAVERA", callback_data="stagione_PRIMAVERA")],
-        [InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")],
+        [
+            InlineKeyboardButton("☀️ ESTATE", callback_data="stagione_ESTATE"),
+            InlineKeyboardButton("🌱 PRIMAVERA", callback_data="stagione_PRIMAVERA"),
+            InlineKeyboardButton("❄️ INVERNO", callback_data="stagione_INVERNO")
+        ],
         [InlineKeyboardButton("🔍 RICERCA INGREDIENTE", callback_data="ricerca_ingrediente_start")],
         [InlineKeyboardButton("✨ CREA SETTIMANA", callback_data="crea_settimana_start")],
         [InlineKeyboardButton("📁 LE MIE SETTIMANE", callback_data="mie_settimane_start")],
