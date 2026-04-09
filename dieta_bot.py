@@ -1567,22 +1567,12 @@ async def visualizza_settimana_salvata(query, user_id, nome_settimana):
 async def elimina_settimana_salvata(query, user_id, nome_settimana):
     """Elimina una settimana salvata"""
     try:
-        with open('settimane_salvate.json', 'r', encoding='utf-8') as f:
-            settimane_salvate = json.load(f)
-    except FileNotFoundError:
-        await query.edit_message_text("❌ Errore: file settimane non trovato!")
-        return
-    
-    if str(user_id) in settimane_salvate and nome_settimana in settimane_salvate[str(user_id)]:
-        del settimane_salvate[str(user_id)][nome_settimana]
-        
-        with open('settimane_salvate.json', 'w', encoding='utf-8') as f:
-            json.dump(settimane_salvate, f, ensure_ascii=False, indent=2)
-        
+        delete_settimana(user_id, nome_settimana)
         await query.edit_message_text(f"✅ Settimana '{nome_settimana}' eliminata!")
         await mostra_mie_settimane(query, user_id)
-    else:
-        await query.edit_message_text("❌ Settimana non trovata!")
+    except Exception as e:
+        logger.error(f"Errore elimina_settimana_salvata: {e}")
+        await query.edit_message_text("❌ Errore nell'eliminazione della settimana!")
 
 async def visualizza_giorno_settimana_salvata(query, user_id, nome_settimana, giorno_idx):
     """Visualizza un giorno specifico di una settimana salvata"""
