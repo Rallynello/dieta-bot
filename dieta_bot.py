@@ -1027,12 +1027,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         password = context.user_data.get('bring_password')
         lista_spesa_source = context.user_data.get('bring_lista_spesa_source')  # Nome lista della spesa originale
         
+        # Recupera il VERO nome della lista dal UUID usando la mappa
+        uuid_to_name = context.user_data.get('bring_uuid_to_name', {})
+        lista_name = uuid_to_name.get(lista_uuid, 'Bring')
+        
         if email and password and nome_lista:
             await query.edit_message_text("⏳ *Caricamento ingredienti su Bring...*", parse_mode="Markdown")
             items_added = await upload_to_bring(email, password, lista_uuid, ingredienti)
             
             if items_added > 0:
-                lista_name = context.user_data.get('bring_lista_name_target', 'Bring')
                 save_bring_credentials(update.effective_user.id, email, password, lista_uuid, lista_name)
                 
                 # Resetta gli spuntati nella lista della spesa originale
@@ -2472,7 +2475,10 @@ async def mostra_liste_bring(query, user_id, nome_lista, ingredienti, context):
     text += f"Ingredienti da caricare: {len(ingredienti)}\n\n"
     
     keyboard = []
+    # Salva mappa UUID -> nome per recuperare dopo
+    bring_uuid_to_name = {}
     for bring_list in bring_lists:
+        bring_uuid_to_name[bring_list['listUuid']] = bring_list['name']
         keyboard.append([
             InlineKeyboardButton(
                 f"📋 {bring_list['name']}", 
@@ -2488,9 +2494,10 @@ async def mostra_liste_bring(query, user_id, nome_lista, ingredienti, context):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
     
+    # Salva in context
     context.user_data['bring_nome_lista'] = nome_lista
     context.user_data['bring_ingredienti'] = ingredienti
-    context.user_data['bring_lista_name_target'] = bring_lists[0]['name'] if bring_lists else 'Bring'
+    context.user_data['bring_uuid_to_name'] = bring_uuid_to_name  # Mappa per recuperare nomi
 
 async def mostra_liste_bring_da_message(update, context, email, password, nome_lista, ingredienti, bring_lists):
     """Mostra le liste Bring quando richiesto via message handler"""
