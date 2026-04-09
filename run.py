@@ -47,19 +47,33 @@ def run_bot():
         # Import qui per evitare problemi di circular import
         from dieta_bot import main as bot_main
         bot_main()
+    except KeyboardInterrupt:
+        logger.info("Bot interrupted")
     except Exception as e:
-        logger.error(f"Bot error: {e}")
+        logger.error(f"Bot error: {e}", exc_info=True)
 
 if __name__ == '__main__':
     # Lancia il bot in un thread daemon separato
+    logger.info("=" * 60)
+    logger.info("STARTING DIETA BOT WITH FLASK MINI APP SERVER")
+    logger.info("=" * 60)
+    
     bot_thread = threading.Thread(target=run_bot, daemon=True)
     bot_thread.start()
-    logger.info("Bot thread started (daemon)")
+    logger.info("✅ Bot thread started (daemon)")
+    logger.info("Waiting for bot to initialize...")
+    
+    import time
+    time.sleep(2)
+    logger.info("=" * 60)
     
     # Lancia Flask nel main thread (questo blocca, come vuole Railway)
     logger.info("Starting Flask server on port 8000...")
+    logger.info("Flask will serve files from: " + str(web_app_dir))
+    logger.info("=" * 60)
+    
     try:
-        app.run(host='0.0.0.0', port=8000, debug=False, threaded=True)
+        app.run(host='0.0.0.0', port=8000, debug=False, threaded=True, use_reloader=False)
     except Exception as e:
         logger.error(f"Flask error: {e}")
         import traceback
