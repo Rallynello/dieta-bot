@@ -918,7 +918,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Lista della spesa - visualizza lista salvata
     elif data.startswith("visualizza_lista_spesa_"):
         nome_lista = data.replace("visualizza_lista_spesa_", "")
-        await visualizza_lista_spesa(query, update.effective_user.id, nome_lista)
+        await visualizza_lista_spesa(query, update.effective_user.id, nome_lista, context)
     
     # Lista della spesa - elimina lista
     elif data.startswith("elimina_lista_spesa_"):
@@ -2126,7 +2126,7 @@ async def salva_lista_spesa_da_settimana(query, user_id, stagione, settimana_num
     context.user_data[f'lista_ingredienti_{nome_lista}'] = ingredienti_lista
     
     await query.answer(f"✅ Lista '{nome_lista}' creata con {len(ingredienti_dict)} ingredienti!", show_alert=True)
-    await visualizza_lista_spesa(query, user_id, nome_lista)
+    await visualizza_lista_spesa(query, user_id, nome_lista, context)
 
 async def visualizza_lista_spesa(query, user_id, nome_lista, context=None):
     """Visualizza una lista della spesa categorizzata con checkbox deflaggabili"""
@@ -2290,7 +2290,7 @@ async def salva_lista_spesa_da_settimana_salvata(query, user_id, nome_settimana,
     context.user_data[f'lista_ingredienti_{nome_lista_spesa}'] = ingredienti_lista
     
     await query.answer(f"✅ Lista '{nome_lista_spesa}' creata con {len(ingredienti_dict)} ingredienti!", show_alert=True)
-    await visualizza_lista_spesa(query, user_id, nome_lista_spesa)
+    await visualizza_lista_spesa(query, user_id, nome_lista_spesa, context)
 
 # ============================================================
 # BRING INTEGRATION - UI FUNCTIONS
