@@ -4,12 +4,19 @@ Runner per lanciare sia il bot Telegram che il server Flask per la mini app
 """
 import threading
 from pathlib import Path
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify
 import logging
+import os
 
 # Configura logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
+
+# Stato globale
+bot_status = {'running': False, 'error': None}
 
 # Crea l'app Flask
 app = Flask(__name__)
@@ -24,13 +31,13 @@ def root():
 @app.route('/<path:path>')
 def static_files(path):
     """Serve file statici"""
-    logger.info(f"Richiesta file: {path} da {web_app_dir}")
+    logger.info(f"Richiesta file: {path}")
     return send_from_directory(web_app_dir, path)
 
 @app.route('/health')
 def health():
     """Health check per Railway"""
-    return {'status': 'ok'}, 200
+    return jsonify({'status': 'ok', 'bot': bot_status}), 200
 
 def run_flask():
     """Lancia il server Flask"""
@@ -43,14 +50,29 @@ def run_flask():
 def run_bot():
     """Lancia il bot Telegram"""
     logger.info("Starting Telegram bot...")
+    global bot_status
     try:
         # Import qui per evitare problemi di circular import
         from dieta_bot import main as bot_main
+        
+        # Controlla se TOKEN esiste
+        TOKEN = os.getenv("TOKEN")
+        if not TOKEN:
+            logger.warning("TOKEN env variable not set - bot will not run but Flask will still serve web_app")
+            bot_status['error'] = 'TOKEN not set'
+            bot_status['running'] = False
+            return
+        
+        logger.info("✅ TOKEN found, starting bot polling...")
+        bot_status['running'] = True
         bot_main()
     except KeyboardInterrupt:
         logger.info("Bot interrupted")
+        bot_status['running'] = False
     except Exception as e:
         logger.error(f"Bot error: {e}", exc_info=True)
+        bot_status['error'] = str(e)
+        bot_status['running'] = False
 
 if __name__ == '__main__':
     # Lancia il bot in un thread daemon separato
