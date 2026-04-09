@@ -15,14 +15,16 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 web_app_dir = Path(__file__).parent / 'web_app'
 
-@app.route('/web_app')
-def web_app_root():
-    """Serve index.html per la mini app"""
+@app.route('/')
+def root():
+    """Serve index.html da radice"""
+    logger.info(f"Richiesta root - serve da {web_app_dir}")
     return send_from_directory(web_app_dir, 'index.html')
 
-@app.route('/web_app/<path:path>')
-def web_app_static(path):
-    """Serve file statici della mini app"""
+@app.route('/<path:path>')
+def static_files(path):
+    """Serve file statici"""
+    logger.info(f"Richiesta file: {path} da {web_app_dir}")
     return send_from_directory(web_app_dir, path)
 
 @app.route('/health')

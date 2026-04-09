@@ -1138,7 +1138,7 @@ Scegli una categoria per selezionare gli ingredienti:
     # Bottone mini app (nuovo!)
     keyboard.append([InlineKeyboardButton(
         "🎨 Seleziona su Web (NUOVO!)", 
-        web_app=WebAppInfo(url="https://dieta-bot.up.railway.app/web_app")
+        web_app=WebAppInfo(url="https://dieta-bot.up.railway.app/")
     )])
     
     keyboard.append([InlineKeyboardButton("🔽 Oppure scegli da categoria:", callback_data="dummy")])
