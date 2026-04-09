@@ -49,11 +49,18 @@ def run_bot():
         logger.error(f"Bot error: {e}")
 
 if __name__ == '__main__':
-    # Lancia Flask in un thread separato (daemon)
-    flask_thread = threading.Thread(target=run_flask, daemon=False)
-    flask_thread.start()
-    logger.info("Flask thread started")
+    # Lancia il bot in un thread daemon separato
+    bot_thread = threading.Thread(target=run_bot, daemon=True)
+    bot_thread.start()
+    logger.info("Bot thread started (daemon)")
     
-    # Lancia il bot nel main thread
-    run_bot()
+    # Lancia Flask nel main thread (questo blocca, come vuole Railway)
+    logger.info("Starting Flask server on port 8000...")
+    try:
+        app.run(host='0.0.0.0', port=8000, debug=False, threaded=True)
+    except Exception as e:
+        logger.error(f"Flask error: {e}")
+        import traceback
+        traceback.print_exc()
+
 
