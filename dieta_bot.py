@@ -938,21 +938,28 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Bring - inizio flusso
     elif data == "bring_start":
+        logger.info(f"🔵 DEBUG: bring_start trigger")
         nome_lista = context.user_data.get('current_lista_spesa')
+        logger.info(f"🔵 DEBUG: current_lista_spesa = {nome_lista}")
         if not nome_lista:
+            logger.error("❌ DEBUG: nome_lista è None!")
             await query.answer("❌ Errore: lista non trovata", show_alert=True)
             return
         
         ingredienti = context.user_data.get(f'lista_ingredienti_{nome_lista}', [])
         if not ingredienti:
+            logger.info(f"🔵 DEBUG: Fetching da DB per {nome_lista}")
             dati_lista = get_lista_spesa(update.effective_user.id, nome_lista)
             if dati_lista:
                 ingredienti = [ing_data['nome'] for ing_data in dati_lista.get('ingredienti', {}).values()]
         
+        logger.info(f"🔵 DEBUG: Trovati {len(ingredienti)} ingredienti")
         credenziali = get_bring_credentials(update.effective_user.id)
         if credenziali:
+            logger.info(f"🔵 DEBUG: Credenziali trovate, mostra liste")
             await mostra_liste_bring(query, update.effective_user.id, nome_lista, ingredienti, context)
         else:
+            logger.info(f"🔵 DEBUG: No credenziali, richiedo email")
             context.user_data['bring_nome_lista'] = nome_lista
             context.user_data['bring_ingredienti'] = ingredienti
             context.user_data['in_bring_email'] = True
