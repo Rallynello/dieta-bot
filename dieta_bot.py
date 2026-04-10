@@ -948,7 +948,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Lista della spesa - crea da settimana salvata
     elif data.startswith("lista_spesa_da_salvata_"):
         nome_settimana = data.replace("lista_spesa_da_salvata_", "")
-        await salva_lista_spesa_da_settimana_salvata(query, update.effective_user.id, nome_settimana, context)
+        await mostra_giorni_settimana_salvata_per_lista(query, update.effective_user.id, nome_settimana)
+    
+    # Lista della spesa - scegli giorno da settimana salvata
+    elif data.startswith("lista_spesa_giorno_salvato_"):
+        parts = data.replace("lista_spesa_giorno_salvato_", "").split("#")
+        nome_settimana = parts[0]
+        giorno_idx = int(parts[1])
+        await salva_lista_spesa_da_giorno_salvato(query, update.effective_user.id, nome_settimana, giorno_idx, context)
     
     # Bring - inizio flusso DA LISTA DELLA SPESA (con filtro spuntati)
     elif data.startswith("bring_start_lista_"):
@@ -2376,6 +2383,128 @@ async def mostra_settimane_salvate_per_lista(query, user_id):
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def mostra_giorni_settimana_salvata_per_lista(query, user_id, nome_settimana):
+    """Mostra i giorni di una settimana salvata per scegliere quale giorno usare per la lista"""
+    dati_settimana = get_settimana(user_id, nome_settimana)
+    
+    if not dati_settimana:
+        await query.answer("❌ Settimana non trovata!", show_alert=True)
+        return
+    
+    settimana = dati_settimana.get('settimana', {})
+    
+    if not settimana:
+        await query.edit_message_text("❌ Dati settimana non validi!")
+        return
+    
+    text = f"📖 *{nome_settimana}*\n\n*Scegli un giorno:*"
+    
+    keyboard = []
+    
+    # Crea bottoni per ogni giorno
+    for idx in sorted([int(i) for i in settimana.keys()]):
+        giorno_data = settimana[str(idx)]
+        giorno_num = idx + 1
+        giorno_nome = giorno_data.get('giorno', 'Giorno sconosciuto')
+        
+        keyboard.append([InlineKeyboardButton(
+            f"📅 Giorno {giorno_num}: {giorno_nome}",
+            callback_data=f"lista_spesa_giorno_salvato_{nome_settimana}#{idx}"
+        )])
+    
+    keyboard.append([InlineKeyboardButton("⬅️ Indietro", callback_data="lista_spesa_da_salvata")])
+    keyboard.append([InlineKeyboardButton("🏠 HOME", callback_data="home")])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def salva_lista_spesa_da_giorno_salvato(query, user_id, nome_settimana, giorno_idx, context):
+    """Estrae ingredienti da un giorno specifico della settimana salvata e crea una lista"""
+    dati_settimana = get_settimana(user_id, nome_settimana)
+    
+    if not dati_settimana:
+        await query.answer("❌ Settimana non trovata!", show_alert=True)
+        return
+    
+    settimana = dati_settimana.get('settimana', {})
+    giorno_data = settimana.get(str(giorno_idx), {})
+    
+    if not giorno_data:
+        await query.answer("❌ Giorno non trovato!", show_alert=True)
+        return
+    
+    # Carica ingredienti da categorizzare
+    try:
+        with open(SCRIPT_DIR / 'ingredienti_definitivi.json', 'r', encoding='utf-8') as f:
+            ingredienti_db = json.load(f)
+    except FileNotFoundError:
+        await query.answer("❌ File ingredienti non trovato!", show_alert=True)
+        return
+    
+    # Crea mappa di ingredienti per ricerca veloce
+    ingredienti_map = {}
+    for categoria, items in ingredienti_db.items():
+        for item in items:
+            ingredienti_map[item.lower()] = categoria
+    
+    # Estrai ingredienti dal giorno selezionato
+    ingredienti_contati = {}  # {categoria: {ingrediente: count}}
+    
+    menu = giorno_data.get('menu', {})
+    for pasto, descrizione in menu.items():
+        if isinstance(descrizione, str):
+            # Splitti intelligente: per virgole e "con"
+            componenti = descrizione.lower().replace(' con ', ',').replace(' e ', ',').split(',')
+            
+            for componente in componenti:
+                componente = componente.strip()
+                
+                # Cerca ingredienti noti in questo componente
+                ingredienti_ordinati = sorted(ingredienti_map.keys(), key=len, reverse=True)
+                
+                for ingrediente_nome in ingredienti_ordinati:
+                    if ingrediente_nome in componente:
+                        categoria = ingredienti_map[ingrediente_nome]
+                        
+                        if categoria not in ingredienti_contati:
+                            ingredienti_contati[categoria] = {}
+                        
+                        # Capitalizza per display
+                        ing_display = next(
+                            (item for item in ingredienti_db[categoria] if item.lower() == ingrediente_nome),
+                            ingrediente_nome.capitalize()
+                        )
+                        
+                        if ing_display not in ingredienti_contati[categoria]:
+                            ingredienti_contati[categoria][ing_display] = 0
+                        ingredienti_contati[categoria][ing_display] += 1
+                        break  # Prendi il primo match in questo componente
+    
+    # Costruisci dict finale
+    ingredienti_dict = {}
+    idx = 0
+    for categoria in sorted(ingredienti_contati.keys()):
+        for ingrediente, count in sorted(ingredienti_contati[categoria].items()):
+            display = f"{ingrediente} (x{count})" if count > 1 else ingrediente
+            ingredienti_dict[idx] = {
+                'nome': display,
+                'categoria': categoria,
+                'spuntato': False
+            }
+            idx += 1
+    
+    # Salva con nome specifico
+    giorno_nome = giorno_data.get('giorno', 'Giorno')
+    nome_lista_spesa = f"Lista - {nome_settimana} - {giorno_nome}"
+    save_lista_spesa(user_id, nome_lista_spesa, "SALVATA", 0, ingredienti_dict)
+    
+    # Salva ingredienti in context per eventuale upload su Bring
+    ingredienti_lista = [ing_data['nome'] for ing_data in ingredienti_dict.values()]
+    context.user_data[f'lista_ingredienti_{nome_lista_spesa}'] = ingredienti_lista
+    
+    await query.answer(f"✅ Lista '{nome_lista_spesa}' creata con {len(ingredienti_dict)} ingredienti!", show_alert=True)
+    await visualizza_lista_spesa(query, user_id, nome_lista_spesa)
 
 async def salva_lista_spesa_da_settimana_salvata(query, user_id, nome_settimana, context):
     """Estrae ingredienti dalla settimana salvata e crea una lista"""
